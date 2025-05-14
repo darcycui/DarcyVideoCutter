@@ -53,6 +53,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // viewModel 拓展方法
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+
     implementation(project(":lib_saf_select"))
     implementation(project(":lib_log_toast"))
     implementation(project(":lib_media3_player"))

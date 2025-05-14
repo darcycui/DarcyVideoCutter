@@ -3,23 +3,33 @@ package com.darcy.videocutter
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.darcy.lib_access_skip.exts.logD
-import com.darcy.lib_access_skip.exts.logE
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.darcy.lib_log_toast.exts.logD
+import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.lib_saf_select.utils.SAFUtil
 import com.darcy.lib_saf_select.utils.SPUtil
-import com.darcy.lib_saf_select.utils.UriUtil
 import com.darcy.videocutter.databinding.ActivityMainBinding
-import com.darcy.videocutter.utils.VideoCutter
-import java.io.File
+import com.darcy.videocutter.utils.TimeUtil
+import com.darcy.videocutter.viewmodel.MainActivityViewModel
+import com.darcy.videocutter.viewmodel.state.VideoCutState
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+    private val viewModel: MainActivityViewModel by viewModels<MainActivityViewModel>()
+    private var startTime = -1L
+    private var endTime = -1L
+    private var videoUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +41,42 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         initView()
+        initFlowCollect()
+    }
+
+    private fun initFlowCollect() {
+        // 观察状态
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is VideoCutState.Idle -> {
+                            // 初始状态
+                        }
+
+                        is VideoCutState.Loading -> {
+                            binding.progressBar.visibility = View.VISIBLE
+                            toasts("开始切割")
+                        }
+
+                        is VideoCutState.Success -> {
+                            binding.progressBar.visibility = View.GONE
+                            toasts("切割成功")
+//                            binding.videoPlayerView.setMediaUri(state.outputUri)
+                        }
+
+                        is VideoCutState.Error -> {
+                            binding.progressBar.visibility = View.GONE
+                            toasts("切割错误: ${state.message}")
+                        }
+
+                        is VideoCutState.Toasts -> {
+                            toasts(state.message)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun initView() {
@@ -38,15 +84,39 @@ class MainActivity : AppCompatActivity() {
             SAFUtil.requestPersistentDirAccess(this)
         }
         binding.btnSelectVideo.setOnClickListener {
+//            viewModel.clearAppCacheFile(this)
             SAFUtil.selectDocument(this)
         }
-        binding.btnTest.setOnClickListener {
-            val fileName = "20250508_142350.mp4"
-            val outFolderPath = getExternalFilesDir("output")
-            val outputFile = File(outFolderPath, "${fileName}_cut.mp4")
-            //复制到输出目录
-            val publicOutFolderUri = SPUtil.getSavedTreeUri(this)
-            UriUtil.copyFileToPublicDir(this, outputFile, fileName, publicOutFolderUri)
+        binding.btnMarkStartTime.setOnClickListener {
+            startTime = binding.videoPlayerView.getCurrentPosition()
+            if (startTime < 0) {
+                startTime = 0
+            }
+            binding.videoPlayerView.pause()
+            binding.btnMarkStartTime.text =
+                getString(R.string.start_00_00_00, TimeUtil.millisecondsToTime(startTime))
+        }
+        binding.btnMarkEndTime.setOnClickListener {
+            endTime = binding.videoPlayerView.getCurrentPosition()
+            if (endTime < 0) {
+                endTime = binding.videoPlayerView.getDuration()
+            }
+            binding.videoPlayerView.pause()
+            if (endTime < startTime) {
+                endTime = startTime
+            }
+            binding.btnMarkEndTime.text =
+                getString(R.string.end_00_00_00, TimeUtil.millisecondsToTime(endTime))
+        }
+        binding.btnCut.setOnClickListener {
+            if (endTime <= startTime) {
+                toasts("结束时间不能小于开始时间，请重新选择")
+            }
+            videoUri?.let {
+                viewModel.cutVideo(this, it, startTime, endTime)
+            } ?: run {
+                toasts("请先选择视频文件")
+            }
         }
     }
 
@@ -56,10 +126,12 @@ class MainActivity : AppCompatActivity() {
             if (requestCode == SAFUtil.DOCUMENT_PICKER_REQUEST_CODE) {
                 resultData?.data?.let { uri ->
                     binding.tvInfo.text = "文件: ${uri.path}"
-                    logD("文件Uri-->${uri.path}")
+                    logD("选择文件Uri-->${uri.path}")
                     binding.videoPlayerView.setMediaUri(uri)
                     binding.videoPlayerView.start()
-                    testCut(uri, 10_000, 15_000)
+//                    viewModel.cutVideo(this, uri, 1_000, 5_000)
+                    resetUI()
+                    videoUri = uri
                 }
             }
 
@@ -71,10 +143,15 @@ class MainActivity : AppCompatActivity() {
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     )
                     // 保存 URI 到 SharedPreferences
-                    SPUtil.saveTreeUri(this, uri)
+                    viewModel.saveSAFTreeUri(uri)
                 }
             }
         }
+    }
+
+    private fun resetUI() {
+        binding.btnMarkStartTime.text = getString(R.string.start_00_00_00)
+        binding.btnMarkEndTime.text = getString(R.string.end_00_00_00)
     }
 
     override fun onPause() {
@@ -95,36 +172,4 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         binding.videoPlayerView.release()
     }
-}
-
-private fun MainActivity.testCut(inputUri: Uri?, start: Long, end: Long) {
-    if (inputUri == null || start <= 0L || end <= 0L || start >= end) {
-        logD("参数不合法 inputUri: $inputUri, start: $start, end: $end")
-        return
-    }
-//    复制到私有目录
-    val inputFileNameFull = UriUtil.getFileNameFromUri(this, inputUri)?.apply {
-        substring(0, lastIndexOf("."))
-    } ?: ""
-    val inputFileName = inputFileNameFull.substring(0, inputFileNameFull.lastIndexOf("."))
-    val tempFile = File(getExternalFilesDir("input"), inputFileName)
-    UriUtil.copyFileToAppDir(this, inputUri, tempFile, inputFileName)
-//    无损切割
-    val cacheFileName = "${inputFileName}_cut.mp4"
-    val cacheFile = File(getExternalFilesDir("output"), cacheFileName)
-    logD("输出路径: ${cacheFile.absolutePath}")
-    VideoCutter.cutVideo(
-        tempFile.absolutePath,
-        cacheFile.absolutePath,
-        start,
-        end,
-        onSuccess = { inputPath, outputPath ->
-            //复制到输出目录
-            val publicOutFolderUri = SPUtil.getSavedTreeUri(this)
-            UriUtil.copyFileToPublicDir(this, cacheFile, cacheFileName, publicOutFolderUri)
-        },
-        onError = { inputPath, outputPath, throwable, message, code ->
-            logE("onError: code=$code message=$message")
-        })
-
 }

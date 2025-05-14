@@ -1,4 +1,4 @@
-package com.darcy.lib_access_skip.exts
+package com.darcy.lib_log_toast.exts
 
 import android.content.Context
 import android.widget.Toast

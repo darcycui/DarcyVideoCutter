@@ -4,12 +4,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
-import com.darcy.lib_access_skip.exts.logE
-import com.darcy.lib_access_skip.exts.logI
+import com.darcy.lib_log_toast.exts.logE
+import com.darcy.lib_log_toast.exts.logI
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
@@ -47,82 +46,98 @@ object UriUtil {
         }
     }
 
-    fun copyFileToAppDir(context: Context, fromUri: Uri?, toFile: File?, toFileName: String?) {
-        scope.launch {
-            if (toFileName.isNullOrEmpty() || fromUri == null || toFile == null) {
-                logE("copyFileToAppDir: fileName or uri or folder is null")
-                return@launch
+    suspend fun copyFileToAppDir(
+        context: Context,
+        fromUri: Uri?,
+        toFile: File?
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            if (fromUri == null || toFile == null) {
+                logE("文件保存到app目录-->失败: fromUri or toFile is null")
+                false
             }
-            context.contentResolver.openInputStream(fromUri).use { ins ->
+            context.contentResolver.openInputStream(fromUri!!).use { ins ->
                 if (ins == null) {
-                    return@launch
+                    false
                 }
-                FileOutputStream(toFile).use {outs->
+                FileOutputStream(toFile).use { outs ->
                     ins.use { input ->
-                        input.copyTo(outs)
+                        input!!.copyTo(outs)
                     }
-                    logI("文件保存成功: ${toFile.absolutePath}")
+                    logI("文件保存到app目录-->成功: ${toFile!!.absolutePath}")
+                    true
                 }
-            }
+            } == true
         }
     }
 
-    fun copyFileToPublicDir(context: Context, fromFolder: File?, fromFileName: String?, toUri: Uri?, ) {
-        scope.launch {
-            if (toUri == null || fromFolder == null || fromFileName == null) {
-                logE("copyFileToPublicDir: fileName or uri or folder is null")
-                return@launch
+    suspend fun copyFileToPublicDir(
+        context: Context,
+        fromFile: File?,
+        toUri: Uri?,
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            if (fromFile == null || fromFile.exists().not() || toUri == null) {
+                logE("文件保存到公共目录-->失败: fromFile or toUri is null")
+                false
             }
-            val inputStream = fromFolder.inputStream()
-            val success = withContext(Dispatchers.IO) {
-                copyFileStream(
-                    context,
-                    ins = inputStream,
-                    targetDirUri = toUri,
-                    fileName = fromFileName
-                )
-            }
+            val inputStream = fromFile!!.inputStream()
+            val fromFileName: String = fromFile.absolutePath.substringAfterLast("/")
+            val success = copyFileStream(
+                context,
+                ins = inputStream,
+                targetDirUri = toUri,
+                fileName = fromFileName
+            )
             if (success) {
-                logI("复制成功 fileName=$fromFileName")
+                logI("文件保存到公共目录-->成功: fileName=$fromFileName")
+                true
             } else {
-                logE("复制失败 fileName=$fromFileName")
+                logE("文件保存到公共目录-->失败: fileName=$fromFileName")
+                false
             }
         }
     }
 
-    private fun copyFileStream(
+    private suspend fun copyFileStream(
         context: Context,
         ins: InputStream?,
         targetDirUri: Uri?,
         fileName: String?
     ): Boolean {
-        return try {
-            if (ins == null || targetDirUri == null || fileName == null) {
-                logE("copyFileStream inputStream or targetDirUri or fileName is null")
-                return false
-            }
-            // 使用系统 API 构造真正可用的 document URI
-            val documentId = DocumentsContract.getTreeDocumentId(targetDirUri)
-            val realTargetUri = DocumentsContract.buildDocumentUriUsingTree(targetDirUri, documentId)
-
-            // 创建文件
-            val fileUri = DocumentsContract.createDocument(
-                context.contentResolver,
-                realTargetUri,
-                getMimeType(fileName),
-                fileName
-            ) ?: return false
-
-            // 写入文件内容
-            context.contentResolver.openOutputStream(fileUri)?.use { outs ->
-                ins.use { input ->
-                    input.copyTo(outs)
+        return withContext(Dispatchers.IO) {
+            try {
+                if (ins == null || targetDirUri == null || fileName == null) {
+                    logE("copyFileStream失败: inputStream or targetDirUri or fileName is null")
+                    false
                 }
-                true
-            } == true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
+                // 使用系统 API 构造真正可用的 document URI
+                val documentId = DocumentsContract.getTreeDocumentId(targetDirUri)
+                val realTargetUri =
+                    DocumentsContract.buildDocumentUriUsingTree(targetDirUri, documentId)
+
+                // 创建文件
+                val fileUri = DocumentsContract.createDocument(
+                    context.contentResolver,
+                    realTargetUri,
+                    getMimeType(fileName!!),
+                    fileName
+                )
+                if (fileUri == null) {
+                    logE("copyFileStream失败: createDocument failed fileUri==null")
+                    false
+                }
+                // 写入文件内容
+                context.contentResolver.openOutputStream(fileUri!!)?.use { outs ->
+                    ins.use { input ->
+                        input!!.copyTo(outs)
+                    }
+                    true
+                } == true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
         }
     }
 

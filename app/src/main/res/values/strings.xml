@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">DarcyVideoCutter</string>
+    <string name="start_00_00_00">标记开始时间\n %s </string>
+    <string name="end_00_00_00">标记结束时间\n %s </string>
+    <string name="cut_period">时长: %s </string>
 </resources>
