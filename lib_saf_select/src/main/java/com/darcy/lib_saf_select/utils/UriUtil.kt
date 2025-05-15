@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
+import android.util.Log.e
 import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_log_toast.exts.logI
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -75,7 +76,7 @@ object UriUtil {
         context: Context,
         fromFile: File?,
         toUri: Uri?,
-    ): Boolean {
+    ): Uri? {
         return withContext(Dispatchers.IO) {
             if (fromFile == null || fromFile.exists().not() || toUri == null) {
                 logE("文件保存到公共目录-->失败: fromFile or toUri is null")
@@ -83,18 +84,18 @@ object UriUtil {
             }
             val inputStream = fromFile!!.inputStream()
             val fromFileName: String = fromFile.absolutePath.substringAfterLast("/")
-            val success = copyFileStream(
+            val fileUri = copyFileStream(
                 context,
                 ins = inputStream,
                 targetDirUri = toUri,
                 fileName = fromFileName
             )
-            if (success) {
-                logI("文件保存到公共目录-->成功: fileName=$fromFileName")
-                true
-            } else {
+            if (fileUri == null) {
                 logE("文件保存到公共目录-->失败: fileName=$fromFileName")
-                false
+                null
+            } else {
+                logI("文件保存到公共目录-->成功: fileName=$fromFileName")
+                fileUri
             }
         }
     }
@@ -104,12 +105,12 @@ object UriUtil {
         ins: InputStream?,
         targetDirUri: Uri?,
         fileName: String?
-    ): Boolean {
+    ): Uri? {
         return withContext(Dispatchers.IO) {
             try {
                 if (ins == null || targetDirUri == null || fileName == null) {
                     logE("copyFileStream失败: inputStream or targetDirUri or fileName is null")
-                    false
+                    null
                 }
                 // 使用系统 API 构造真正可用的 document URI
                 val documentId = DocumentsContract.getTreeDocumentId(targetDirUri)
@@ -125,18 +126,18 @@ object UriUtil {
                 )
                 if (fileUri == null) {
                     logE("copyFileStream失败: createDocument failed fileUri==null")
-                    false
+                    null
                 }
                 // 写入文件内容
                 context.contentResolver.openOutputStream(fileUri!!)?.use { outs ->
                     ins.use { input ->
                         input!!.copyTo(outs)
                     }
-                    true
-                } == true
+                }
+                fileUri
             } catch (e: Exception) {
                 e.printStackTrace()
-                false
+                null
             }
         }
     }

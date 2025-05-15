@@ -1,5 +1,6 @@
 package com.darcy.videocutter.interface_dapters
 
+import android.net.Uri
 import java.io.File
 
 interface IFileRepository {
@@ -19,7 +20,7 @@ interface IFileRepository {
 
     suspend fun copyToPublicOutput(
         cutFilePath: String, uriStr: String
-    ): Boolean
+    ): Uri?
 
     suspend fun deleteFile(filePath: String): Boolean
 

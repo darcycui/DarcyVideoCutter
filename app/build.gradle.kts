@@ -1,4 +1,6 @@
-import org.gradle.kotlin.dsl.implementation
+import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,13 +21,41 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // load key store from local.properties
+    val localProperties = gradleLocalProperties(File(project.rootDir.absolutePath))
+    signingConfigs {
+        create("debugSign") {
+            storeFile = file(localProperties.getProperty("keystore_path"))
+            keyAlias = localProperties.getProperty("key_alias")
+            storePassword = localProperties.getProperty("store_password")
+            keyPassword = localProperties.getProperty("key_password")
+        }
+
+        create("releaseSign") {
+            storeFile = file(localProperties.getProperty("keystore_path"))
+            keyAlias = localProperties.getProperty("key_alias")
+            storePassword = localProperties.getProperty("store_password")
+            keyPassword = localProperties.getProperty("key_password")
+        }
+    }
+
+
     buildTypes {
-        release {
+        debug {
+            isDebuggable = true
             isMinifyEnabled = false
+            isShrinkResources = false
+            signingConfig = signingConfigs.getByName("debugSign")
+        }
+        release {
+            isMinifyEnabled = true
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("releaseSign")
         }
     }
     compileOptions {
@@ -42,6 +72,20 @@ android {
     }
 }
 
+fun gradleLocalProperties(projectRootDir: File): Properties {
+    val properties = Properties()
+    val localProperties = File(projectRootDir, "local.properties")
+
+    if (localProperties.isFile) {
+        InputStreamReader(FileInputStream(localProperties), Charsets.UTF_8).use { reader ->
+            properties.load(reader)
+        }
+    } else {
+        println("Gradle local properties file not found at $localProperties")
+    }
+    return properties
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -54,11 +98,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // viewModel 拓展方法
-    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     implementation(project(":lib_saf_select"))
     implementation(project(":lib_log_toast"))
     implementation(project(":lib_media3_player"))
 
-    implementation (libs.mobile.ffmpeg.full)
+    implementation(libs.mobile.ffmpeg.full)
 }

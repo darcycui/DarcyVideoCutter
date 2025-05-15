@@ -1,0 +1,4 @@
+<resources>
+    <string name="start_00_00_00">标记开始时间 %s </string>
+    <string name="end_00_00_00">标记结束时间 %s </string>
+</resources>

@@ -1,5 +1,6 @@
 package com.darcy.videocutter.usecase
 
+import android.net.Uri
 import com.darcy.videocutter.interface_dapters.IFileRepository
 
 /**
@@ -9,9 +10,9 @@ class CopyToPublicOutUseCase(
     private val fileRepository: IFileRepository
 ) {
     // 重载operator
-    suspend operator fun invoke(cutFilePath: String?, uriStr: String?): Boolean {
+    suspend operator fun invoke(cutFilePath: String?, uriStr: String?): Uri? {
         return if (cutFilePath == null || uriStr == null) {
-            false
+            null
         } else {
             fileRepository.copyToPublicOutput(cutFilePath, uriStr)
         }

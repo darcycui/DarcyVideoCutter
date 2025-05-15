@@ -1,11 +1,10 @@
 package com.darcy.videocutter.viewmodel
 
-import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
-import com.darcy.lib_saf_select.utils.UriUtil
+import com.darcy.lib_log_toast.exts.logI
 import com.darcy.videocutter.repository.CutVideoRepository
 import com.darcy.videocutter.repository.FileRepository
 import com.darcy.videocutter.repository.SPRepository
@@ -17,6 +16,7 @@ import com.darcy.videocutter.usecase.DeleteInputCacheFolderUseCase
 import com.darcy.videocutter.usecase.DeleteOutputCacheFolderUseCase
 import com.darcy.videocutter.usecase.GetSAFTreeUseCase
 import com.darcy.videocutter.usecase.SaveSAFTreeUseCase
+import com.darcy.videocutter.utils.TimeUtil
 import com.darcy.videocutter.viewmodel.state.VideoCutState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -56,11 +56,17 @@ class MainActivityViewModel : ViewModel() {
     }
     private var tempCacheFilePath = ""
     private var tempCutFilePath = ""
-
+    private var publicOutUri: Uri? = null
+    private var inputUri: Uri? = null
+    private var startTime = -1L
+    private var endTime = -1L
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         logE("$TAG error: $throwable")
         throwable.printStackTrace()
+        ioScope.launch {
+            _uiState.emit(VideoCutState.Error(throwable.message ?: "未知错误"))
+        }
     }
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + exceptionHandler)
     private val mainScope: CoroutineScope = CoroutineScope(Dispatchers.Main + exceptionHandler)
@@ -75,10 +81,10 @@ class MainActivityViewModel : ViewModel() {
     /**
      * 切割视频
      */
-    fun cutVideo(context: Context, inputUri: Uri?, start: Long, end: Long) {
+    fun cutVideo() {
         ioScope.launch {
-            if (inputUri == null || start <= 0L || end <= 0L || start >= end) {
-                logD("参数不合法 inputUri: $inputUri, start: $start, end: $end")
+            if (inputUri == null || startTime <= 0L || endTime <= 0L || startTime >= endTime) {
+                logD("参数不合法 inputUri: $inputUri, startTime: $startTime, endTime: $endTime")
                 _uiState.emit(VideoCutState.Error("参数不合法"))
                 return@launch
             }
@@ -96,7 +102,7 @@ class MainActivityViewModel : ViewModel() {
             }
 
             // 无损切割
-            cutVideoUseCase.invoke(inputUri.toString(), start, end).also {
+            cutVideoUseCase.invoke(inputUri.toString(), startTime, endTime).also {
                 if (it.isEmpty()) {
                     logE("onError: 切割失败")
                     _uiState.emit(VideoCutState.Error("切割失败"))
@@ -107,11 +113,12 @@ class MainActivityViewModel : ViewModel() {
 
             //复制到输出目录
             copyToPublicOutUseCase.invoke(tempCutFilePath, getSAFTreeUseCase.invoke()).also {
-                if (!it) {
+                if (it == null) {
                     logE("onError: 复制到out失败")
                     _uiState.emit(VideoCutState.Error("复制到out失败"))
                     return@launch
                 }
+                publicOutUri = it
             }
 
             // 删除临时文件
@@ -129,11 +136,16 @@ class MainActivityViewModel : ViewModel() {
                     return@launch
                 }
             }
-            _uiState.emit(VideoCutState.Success(null))
+            publicOutUri?.let {
+                _uiState.emit(VideoCutState.Success(it))
+            } ?: run {
+                logE("onError: 输出到公共目录失败 publicOutUri is null")
+                _uiState.emit(VideoCutState.Error("输出到公共目录失败"))
+            }
         }
     }
 
-    fun clearAppCacheFile(context: Context) {
+    fun clearAppCacheFile() {
         ioScope.launch {
             try {
                 // 清除input cache
@@ -143,8 +155,7 @@ class MainActivityViewModel : ViewModel() {
                         _uiState.emit(VideoCutState.Error("清除input_tmp失败:删除文件夹失败"))
                         return@launch
                     }
-                    logD("清除input_tmp-->成功")
-                    _uiState.emit(VideoCutState.Toasts("清除input_tmp成功"))
+                    logI("清除input_tmp-->成功")
                 }
                 deleteOutputCacheFolderCase.invoke().also {
                     if (!it) {
@@ -152,12 +163,49 @@ class MainActivityViewModel : ViewModel() {
                         _uiState.emit(VideoCutState.Error("清除output_tmp失败:删除文件夹失败"))
                         return@launch
                     }
+                    logI("清除output_tmp-->成功")
                 }
             } catch (e: Exception) {
                 logE("清除input_tmp output_tmp-->失败: $e")
                 _uiState.emit(VideoCutState.Error("清除input_tmp output_tmp失败:异常"))
                 return@launch
             }
+        }
+    }
+
+    fun setupVideoUri(uri: Uri) {
+        ioScope.launch {
+            inputUri = uri
+            _uiState.emit(VideoCutState.SelectVideo(uri))
+        }
+    }
+
+    fun setupStartTime(time: Long) {
+        ioScope.launch {
+            startTime = time
+            if (startTime < 0) {
+                startTime = 0
+            }
+            _uiState.emit(VideoCutState.MarkStartTime(startTime))
+        }
+    }
+
+    fun setupEndTime(time: Long) {
+        ioScope.launch {
+            endTime = time
+            _uiState.emit(VideoCutState.MarkEndTime(endTime))
+        }
+    }
+
+    fun setupPeriod() {
+        ioScope.launch {
+            if (startTime < 0 || endTime < 0 || startTime >= endTime) {
+                _uiState.emit(VideoCutState.Period(""))
+                return@launch
+            }
+            val periodText = TimeUtil.millisecondsToTime(endTime - startTime)
+            logI("时长: $periodText")
+            _uiState.emit(VideoCutState.Period(periodText))
         }
     }
 }

@@ -11,14 +11,15 @@
         android:id="@+id/spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
         android:id="@+id/tvInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/spaceBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -86,6 +87,7 @@
         android:id="@+id/spaceTop"
         android:layout_width="match_parent"
         android:layout_height="20dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime"
         app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
 

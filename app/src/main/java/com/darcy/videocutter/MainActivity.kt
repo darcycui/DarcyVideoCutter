@@ -1,21 +1,19 @@
 package com.darcy.videocutter
 
 import android.content.Intent
-import android.net.Uri
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.lib_saf_select.utils.SAFUtil
-import com.darcy.lib_saf_select.utils.SPUtil
 import com.darcy.videocutter.databinding.ActivityMainBinding
 import com.darcy.videocutter.utils.TimeUtil
 import com.darcy.videocutter.viewmodel.MainActivityViewModel
@@ -27,9 +25,6 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
     private val viewModel: MainActivityViewModel by viewModels<MainActivityViewModel>()
-    private var startTime = -1L
-    private var endTime = -1L
-    private var videoUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +33,9 @@ class MainActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val controller = WindowCompat.getInsetsController(window,v)
+            controller.isAppearanceLightStatusBars = false // 关闭浅色模式，字体变白
+            window.statusBarColor = resources.getColor(R.color.black, null)
             insets
         }
         initView()
@@ -47,31 +45,64 @@ class MainActivity : AppCompatActivity() {
     private fun initFlowCollect() {
         // 观察状态
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    when (state) {
-                        is VideoCutState.Idle -> {
-                            // 初始状态
-                        }
+            viewModel.uiState.collect { state ->
+                when (state) {
+                    is VideoCutState.Idle -> {
+                        // 初始状态
+                    }
 
-                        is VideoCutState.Loading -> {
-                            binding.progressBar.visibility = View.VISIBLE
-                            toasts("开始切割")
-                        }
+                    is VideoCutState.Loading -> {
+                        binding.progressBar.visibility = View.VISIBLE
+                        toasts("开始切割")
+                    }
 
-                        is VideoCutState.Success -> {
-                            binding.progressBar.visibility = View.GONE
-                            toasts("切割成功")
-//                            binding.videoPlayerView.setMediaUri(state.outputUri)
-                        }
+                    is VideoCutState.Success -> {
+                        binding.progressBar.visibility = View.GONE
+                        toasts("切割成功:${state.outputUri}")
+                    }
 
-                        is VideoCutState.Error -> {
-                            binding.progressBar.visibility = View.GONE
-                            toasts("切割错误: ${state.message}")
-                        }
+                    is VideoCutState.Error -> {
+                        binding.progressBar.visibility = View.GONE
+                        toasts("切割错误: ${state.error}")
+                    }
 
-                        is VideoCutState.Toasts -> {
-                            toasts(state.message)
+                    is VideoCutState.Toasts -> {
+                        toasts(state.message)
+                    }
+
+                    is VideoCutState.SelectVideo -> {
+                        binding.tvInfo.text = getString(R.string.file_path, state.videoUri.path)
+                        binding.videoPlayerView.setMediaUri(state.videoUri)
+                        binding.videoPlayerView.start()
+                        resetUI()
+                    }
+
+                    is VideoCutState.MarkStartTime -> {
+                        binding.videoPlayerView.pause()
+                        binding.btnMarkStartTime.text =
+                            getString(
+                                R.string.start_00_00_00,
+                                TimeUtil.millisecondsToTime(state.time)
+                            )
+                        setPeriodTextInfo()
+                    }
+
+                    is VideoCutState.MarkEndTime -> {
+                        binding.videoPlayerView.pause()
+                        binding.btnMarkEndTime.text =
+                            getString(
+                                R.string.end_00_00_00,
+                                TimeUtil.millisecondsToTime(state.time)
+                            )
+                        setPeriodTextInfo()
+                    }
+
+                    is VideoCutState.Period -> {
+                        val text = state.text
+                        if (text.isEmpty()) {
+                            binding.tvCutPeriod.text = getString(R.string.cut_period_default)
+                        } else {
+                            binding.tvCutPeriod.text = getString(R.string.cut_period, text)
                         }
                     }
                 }
@@ -84,39 +115,17 @@ class MainActivity : AppCompatActivity() {
             SAFUtil.requestPersistentDirAccess(this)
         }
         binding.btnSelectVideo.setOnClickListener {
-//            viewModel.clearAppCacheFile(this)
+//            viewModel.clearAppCacheFile()
             SAFUtil.selectDocument(this)
         }
         binding.btnMarkStartTime.setOnClickListener {
-            startTime = binding.videoPlayerView.getCurrentPosition()
-            if (startTime < 0) {
-                startTime = 0
-            }
-            binding.videoPlayerView.pause()
-            binding.btnMarkStartTime.text =
-                getString(R.string.start_00_00_00, TimeUtil.millisecondsToTime(startTime))
+            viewModel.setupStartTime(binding.videoPlayerView.getCurrentPosition())
         }
         binding.btnMarkEndTime.setOnClickListener {
-            endTime = binding.videoPlayerView.getCurrentPosition()
-            if (endTime < 0) {
-                endTime = binding.videoPlayerView.getDuration()
-            }
-            binding.videoPlayerView.pause()
-            if (endTime < startTime) {
-                endTime = startTime
-            }
-            binding.btnMarkEndTime.text =
-                getString(R.string.end_00_00_00, TimeUtil.millisecondsToTime(endTime))
+            viewModel.setupEndTime(binding.videoPlayerView.getCurrentPosition())
         }
         binding.btnCut.setOnClickListener {
-            if (endTime <= startTime) {
-                toasts("结束时间不能小于开始时间，请重新选择")
-            }
-            videoUri?.let {
-                viewModel.cutVideo(this, it, startTime, endTime)
-            } ?: run {
-                toasts("请先选择视频文件")
-            }
+            viewModel.cutVideo()
         }
     }
 
@@ -125,13 +134,8 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == RESULT_OK) {
             if (requestCode == SAFUtil.DOCUMENT_PICKER_REQUEST_CODE) {
                 resultData?.data?.let { uri ->
-                    binding.tvInfo.text = "文件: ${uri.path}"
                     logD("选择文件Uri-->${uri.path}")
-                    binding.videoPlayerView.setMediaUri(uri)
-                    binding.videoPlayerView.start()
-//                    viewModel.cutVideo(this, uri, 1_000, 5_000)
-                    resetUI()
-                    videoUri = uri
+                    viewModel.setupVideoUri(uri)
                 }
             }
 
@@ -147,6 +151,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun setPeriodTextInfo() {
+        viewModel.setupPeriod()
     }
 
     private fun resetUI() {
@@ -171,5 +179,27 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         binding.videoPlayerView.release()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setDynamicUI()
+            binding.tvInfo.visibility = View.VISIBLE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.VISIBLE
+        } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setDynamicUI()
+            binding.tvInfo.visibility = View.GONE
+            binding.spaceTop.visibility = View.GONE
+            binding.spaceBottom.visibility = View.GONE
+        }
+    }
+
+    private fun setDynamicUI() {
+        val startTimeText = binding.btnMarkStartTime.text.toString().trim().substringAfterLast(" ")
+        binding.btnMarkStartTime.text = getString(R.string.start_00_00_00, "$startTimeText ")
+        val endTimeText = binding.btnMarkEndTime.text.toString().trim().substringAfterLast(" ")
+        binding.btnMarkEndTime.text = getString(R.string.end_00_00_00, "$endTimeText ")
     }
 }

@@ -1,6 +1,7 @@
 package com.darcy.videocutter.repository
 
 import android.content.Context
+import android.net.Uri
 import com.darcy.lib_saf_select.utils.UriUtil
 import com.darcy.videocutter.app.App
 import com.darcy.videocutter.interface_dapters.IFileRepository
@@ -53,15 +54,15 @@ class FileRepository(private val context: Context = App.getInstance()) : IFileRe
     override suspend fun copyToPublicOutput(
         cutFilePath: String,
         uriStr: String
-    ): Boolean {
+    ): Uri? {
         if (_outputTempFile == null) {
-            return false
+            return null
         }
         //复制到输出目录
         val publicOutFolderUri = uriStr.toUri()
         val fromFile = File(cutFilePath)
         if (fromFile.exists().not()) {
-            return false
+            return null
         }
         return UriUtil.copyFileToPublicDir(context, File(cutFilePath), publicOutFolderUri)
     }
