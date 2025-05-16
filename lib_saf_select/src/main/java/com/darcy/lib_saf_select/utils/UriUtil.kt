@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
-import android.util.Log.e
 import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_log_toast.exts.logI
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -13,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 
 
 /**
@@ -82,34 +80,31 @@ object UriUtil {
                 logE("文件保存到公共目录-->失败: fromFile or toUri is null")
                 false
             }
-            val inputStream = fromFile!!.inputStream()
-            val fromFileName: String = fromFile.absolutePath.substringAfterLast("/")
-            val fileUri = copyFileStream(
+            val fileUri = copyFileToSAFTreeFolder(
                 context,
-                ins = inputStream,
-                targetDirUri = toUri,
-                fileName = fromFileName
+                fromFile = fromFile!!,
+                targetDirUri = toUri!!,
             )
             if (fileUri == null) {
-                logE("文件保存到公共目录-->失败: fileName=$fromFileName")
+                logE("文件保存到公共目录-->失败: fromFile=${fromFile.absolutePath}")
                 null
             } else {
-                logI("文件保存到公共目录-->成功: fileName=$fromFileName")
+                logI("文件保存到公共目录-->成功: fromFile=${fromFile.absolutePath}")
                 fileUri
             }
         }
     }
 
-    private suspend fun copyFileStream(
+    private suspend fun copyFileToSAFTreeFolder(
         context: Context,
-        ins: InputStream?,
-        targetDirUri: Uri?,
-        fileName: String?
+        fromFile: File,
+        targetDirUri: Uri,
     ): Uri? {
         return withContext(Dispatchers.IO) {
-            try {
-                if (ins == null || targetDirUri == null || fileName == null) {
-                    logE("copyFileStream失败: inputStream or targetDirUri or fileName is null")
+            runCatching {
+                val fileName: String = fromFile.absolutePath.substringAfterLast("/")
+                if (fileName.isEmpty()) {
+                    logE("copyFileToSAFTreeFolder 失败: fileName is null")
                     null
                 }
                 // 使用系统 API 构造真正可用的 document URI
@@ -121,7 +116,7 @@ object UriUtil {
                 val fileUri = DocumentsContract.createDocument(
                     context.contentResolver,
                     realTargetUri,
-                    getMimeType(fileName!!),
+                    getMimeType(fileName),
                     fileName
                 )
                 if (fileUri == null) {
@@ -130,15 +125,15 @@ object UriUtil {
                 }
                 // 写入文件内容
                 context.contentResolver.openOutputStream(fileUri!!)?.use { outs ->
-                    ins.use { input ->
-                        input!!.copyTo(outs)
+                    fromFile.inputStream().use { input ->
+                        input.copyTo(outs)
                     }
                 }
                 fileUri
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
+            }.onFailure {
+                logE("copyFileToSAFTreeFolder 错误: $it")
+                it.printStackTrace()
+            }.getOrElse { null }
         }
     }
 

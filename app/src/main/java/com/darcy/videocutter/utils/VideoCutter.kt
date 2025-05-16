@@ -53,13 +53,13 @@ object VideoCutter {
             logD("command-->${command.joinToString(separator = " ")}")
             val result = FFmpeg.execute(command)
             if (result == RETURN_CODE_SUCCESS) {
-                logD("切割成功.", Config.TAG)
+                logD("${Config.TAG} 切割成功.")
                 true
             } else if (result == RETURN_CODE_CANCEL) {
-                logV("切割取消.", Config.TAG)
+                logV("${Config.TAG} 切割取消.", Config.TAG)
                 false
             } else {
-                logE(String.format(Locale.CHINA, "切割失败.", result), Config.TAG)
+                logE("${Config.TAG} 切割失败. result=$result")
                 Config.printLastCommandOutput(Log.INFO)
                 false
             }

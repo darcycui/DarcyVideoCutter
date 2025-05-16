@@ -92,14 +92,14 @@ class MainActivityViewModel : ViewModel() {
             _uiState.emit(VideoCutState.Loading)
 
             // 复制到私有目录
-            copyToInputTempUseCase.invoke(inputUri.toString()).also {
-                if (it.isEmpty()) {
-                    logE("onError: 复制到input_tmp失败")
-                    _uiState.emit(VideoCutState.Error("复制到input_tmp失败"))
-                    return@launch
-                }
-                tempCacheFilePath = it
-            }
+//            copyToInputTempUseCase.invoke(inputUri.toString()).also {
+//                if (it.isEmpty()) {
+//                    logE("onError: 复制到input_tmp失败")
+//                    _uiState.emit(VideoCutState.Error("复制到input_tmp失败"))
+//                    return@launch
+//                }
+//                tempCacheFilePath = it
+//            }
 
             // 无损切割
             cutVideoUseCase.invoke(inputUri.toString(), startTime, endTime).also {
@@ -122,13 +122,13 @@ class MainActivityViewModel : ViewModel() {
             }
 
             // 删除临时文件
-            deleteFileUseCase.invoke(tempCacheFilePath).also {
-                if (!it) {
-                    logE("onError: 删除output_tmp文件失败")
-                    _uiState.emit(VideoCutState.Error("删除output_tmp文件失败"))
-                    return@launch
-                }
-            }
+//            deleteFileUseCase.invoke(tempCacheFilePath).also {
+//                if (!it) {
+//                    logE("onError: 删除input_tmp文件失败")
+//                    _uiState.emit(VideoCutState.Error("删除input_tmp文件失败"))
+//                    return@launch
+//                }
+//            }
             deleteFileUseCase.invoke(tempCutFilePath).also {
                 if (!it) {
                     logE("onError: 删除output_tmp文件失败")

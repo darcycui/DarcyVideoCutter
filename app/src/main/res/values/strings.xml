@@ -5,4 +5,19 @@
     <string name="cut_period"> %s </string>
     <string name="cut_period_default"> 00:00:00 </string>
     <string name="file_path">文件: %1$s</string>
+    <!-- 权限相关 -->
+    <string name="title_media_permission">视频访问权限说明</string>
+    <string name="rationale_media_permission">需要访问视频文件权限来剪辑您选择的媒体内容，该权限仅用于视频处理功能</string>
+
+    <string name="title_storage_permission">存储权限说明</string>
+    <string name="rationale_storage_permission">需要存储权限来读取您设备上的视频文件，该权限仅用于选择需要剪辑的视频</string>
+
+    <string name="title_permission_denied">权限未授予</string>
+    <string name="msg_permission_denied">您已拒绝必要权限，部分功能将无法使用。\n\n可以在系统设置中手动开启权限</string>
+
+    <!-- 通用按钮 -->
+    <string name="btn_continue_request">继续授权</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_app_settings">去设置</string>
+
 </resources>
