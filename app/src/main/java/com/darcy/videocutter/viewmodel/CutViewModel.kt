@@ -25,9 +25,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-class MainActivityViewModel : ViewModel() {
+/**
+ * 视频切割
+ */
+class CutViewModel : ViewModel() {
     companion object {
-        private val TAG = MainActivityViewModel::class.java.simpleName
+        private val TAG = CutViewModel::class.java.simpleName
     }
 
     private val copyToInputTempUseCase: CopyToInputTempUseCase by lazy {
@@ -176,7 +179,7 @@ class MainActivityViewModel : ViewModel() {
     fun setupVideoUri(uri: Uri) {
         ioScope.launch {
             inputUri = uri
-            _uiState.emit(VideoCutState.SelectVideo(uri))
+            _uiState.emit(VideoCutState.SelectedVideo(uri))
         }
     }
 

@@ -1,5 +1,7 @@
 package com.darcy.videocutter.utils
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -19,4 +21,12 @@ object TimeUtil {
             TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
         )
     }
+    /**
+     * 获取当前时间 yyyy-MM-dd-HH:mm:ss
+     */
+    fun getCurrentTime(): String {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
+        return LocalDateTime.now().format(formatter)
+    }
+
 }

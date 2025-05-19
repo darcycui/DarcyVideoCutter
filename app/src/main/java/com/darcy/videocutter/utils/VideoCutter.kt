@@ -33,11 +33,11 @@ object VideoCutter {
         outputPath: String?,
         startMs: Long,
         endMs: Long
-    ): Boolean {
+    ): String? {
         return withContext(Dispatchers.IO) {
             if (inputPath.isNullOrEmpty() || outputPath.isNullOrEmpty()) {
                 logE("$TAG inputPath or outputPath is null or empty")
-                false
+                null
             }
             logV("$TAG inputPath-->$inputPath")
             logV("$TAG outputPath-->$outputPath")
@@ -54,14 +54,14 @@ object VideoCutter {
             val result = FFmpeg.execute(command)
             if (result == RETURN_CODE_SUCCESS) {
                 logD("${Config.TAG} 切割成功.")
-                true
+                outputPath
             } else if (result == RETURN_CODE_CANCEL) {
                 logV("${Config.TAG} 切割取消.", Config.TAG)
-                false
+                null
             } else {
                 logE("${Config.TAG} 切割失败. result=$result")
                 Config.printLastCommandOutput(Log.INFO)
-                false
+                null
             }
         }
     }

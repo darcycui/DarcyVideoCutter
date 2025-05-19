@@ -19,7 +19,7 @@ interface IFileRepository {
     suspend fun copyToInputTemp(uriStr: String): String
 
     suspend fun copyToPublicOutput(
-        cutFilePath: String, uriStr: String
+        cutFilePath: String?, uriStr: String?
     ): Uri?
 
     suspend fun deleteFile(filePath: String): Boolean

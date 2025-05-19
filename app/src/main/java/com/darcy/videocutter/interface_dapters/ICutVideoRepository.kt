@@ -5,5 +5,5 @@ interface ICutVideoRepository {
         inputUriStr: String?,
         startMs: Long,
         endMs: Long
-    ): String
+    ): String?
 }

@@ -52,19 +52,19 @@ class FileRepository(private val context: Context = App.getInstance()) : IFileRe
     }
 
     override suspend fun copyToPublicOutput(
-        cutFilePath: String,
-        uriStr: String
+        fromFilePath: String?,
+        uriStr: String?
     ): Uri? {
-        if (_outputTempFile == null) {
+        if (_outputTempFile == null ||  fromFilePath.isNullOrEmpty() || uriStr.isNullOrEmpty()) {
             return null
         }
         //复制到输出目录
         val publicOutFolderUri = uriStr.toUri()
-        val fromFile = File(cutFilePath)
+        val fromFile = File(fromFilePath)
         if (fromFile.exists().not()) {
             return null
         }
-        return UriUtil.copyFileToPublicDir(context, File(cutFilePath), publicOutFolderUri)
+        return UriUtil.copyFileToPublicDir(context, File(fromFilePath), publicOutFolderUri)
     }
 
     override suspend fun deleteInputCacheFolder(): Boolean {

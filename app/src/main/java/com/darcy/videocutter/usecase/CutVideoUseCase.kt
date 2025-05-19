@@ -17,7 +17,7 @@ class CutVideoUseCase(
         return if (inputUriStr == null || startMs < 0 || endMs < 0 || startMs >= endMs) {
             ""
         } else {
-            cutVideoRepository.cutVideo(inputUriStr, startMs, endMs)
+            cutVideoRepository.cutVideo(inputUriStr, startMs, endMs) ?: ""
         }
     }
 }
