@@ -37,8 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 允许延伸到状态栏和导航栏
         enableEdgeToEdge()
         setContentView(binding.root)
+        // 禁用导航栏背景色对比度
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
