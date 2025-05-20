@@ -1,18 +1,20 @@
 package com.darcy.videocutter
 
 import android.content.Intent
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.darcy.lib_log_toast.exts.logD
+import com.darcy.lib_log_toast.exts.logE
+import com.darcy.lib_log_toast.exts.logI
 import com.darcy.lib_log_toast.exts.logV
 import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.lib_saf_select.utils.SAFUtil
@@ -22,7 +24,6 @@ import com.darcy.videocutter.fragment.VideoThumbnailFragment
 import com.darcy.videocutter.viewmodel.JoinViewModel
 import com.darcy.videocutter.viewmodel.state.VideoJoinState
 import kotlinx.coroutines.launch
-import java.io.File
 
 class JoinActivity : AppCompatActivity() {
     private val binding: ActivityJoinBinding by lazy {
@@ -34,56 +35,32 @@ class JoinActivity : AppCompatActivity() {
         ViewPager2Adapter(supportFragmentManager, lifecycle, fragments)
     }
 
-    fun initTestData() {
-        val imageFolder = getExternalFilesDir("video_thumbnail")
-        val image1 = File(imageFolder, "image1.jpg")
-        val image2 = File(imageFolder, "image2.jpg")
-        val image3 = File(imageFolder, "image3.jpg")
-        fragments.add(VideoThumbnailFragment.newInstance(image1.absolutePath, image1.absolutePath))
-        fragments.add(VideoThumbnailFragment.newInstance(image2.absolutePath, image2.absolutePath))
-        fragments.add(VideoThumbnailFragment.newInstance(image3.absolutePath, image3.absolutePath))
-    }
-
-    fun addItems(items: List<String>) {
+    fun addItems(videoItems: List<String>, thumbnailItems: List<String>) {
+        if (videoItems.isEmpty() || thumbnailItems.isEmpty()) {
+            logE("视频或缩略图为空")
+            toasts("视频或缩略图为空")
+            return
+        }
+        if (videoItems.size != thumbnailItems.size) {
+            logE("视频和缩略图数量不一致")
+            toasts("视频和缩略图数量不一致")
+            return
+        }
         fragments.clear()
-        for (imageFile in items) {
-            logV("addItem: $imageFile")
-            fragments.add(VideoThumbnailFragment.newInstance(imageFile, imageFile))
+        for (i in 0 until videoItems.size) {
+            logV("addItem: ${videoItems[i]}")
+            fragments.add(VideoThumbnailFragment.newInstance(videoItems[i], thumbnailItems[i]))
         }
         viewpager2Adapter.notifyDataSetChanged()
-    }
-
-    fun addItem(imageFile: File) {
-        fragments.add(
-            VideoThumbnailFragment.newInstance(imageFile.absolutePath, imageFile.absolutePath)
-        )
-        viewpager2Adapter.notifyItemInserted(fragments.size - 1)
-    }
-
-    fun removeItem(position: Int) {
-        fragments.removeAt(position)
-        viewpager2Adapter.notifyItemRemoved(position)
-    }
-
-    fun updateItem(position: Int, imageFile: File) {
-        fragments[position] =
-            VideoThumbnailFragment.newInstance(imageFile.absolutePath, imageFile.absolutePath)
-        viewpager2Adapter.notifyItemChanged(position)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            val controller = WindowCompat.getInsetsController(window, v)
-            controller.isAppearanceLightStatusBars = false // 关闭浅色模式，字体变白
-            window.statusBarColor = resources.getColor(R.color.black, null) // 状态栏背景色
-            insets
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
         }
-        initTestData()
         initView()
         initFlowCollect()
     }
@@ -94,8 +71,9 @@ class JoinActivity : AppCompatActivity() {
                 viewModel.uiState.collect { state ->
                     when (state) {
                         is VideoJoinState.Error -> {
-                            logD("拼接错误: ${state.error}")
-                            toasts(state.error)
+                            logE("拼接错误: ${state.error}")
+                            toasts("拼接错误:${state.error}")
+                            binding.progressBar.visibility = View.GONE
                         }
 
                         is VideoJoinState.Idle -> {
@@ -103,18 +81,23 @@ class JoinActivity : AppCompatActivity() {
                         }
 
                         is VideoJoinState.Loading -> {
-                            logD("开始拼接视频")
-                            toasts("开始拼接视频...")
+                            logD("开始拼接...")
+                            toasts("开始拼接...")
+                            binding.progressBar.visibility = View.VISIBLE
                         }
 
                         is VideoJoinState.Success -> {
-                            logD("拼接成功: ${state.outputUri}")
+                            logI("拼接成功: ${state.outputUri}")
                             toasts("拼接成功：${state.outputUri}")
+                            binding.progressBar.visibility = View.GONE
+                            binding.tvInfo.text = getString(R.string.file_path_joined, state.outputUri.path)
                         }
 
                         is VideoJoinState.SelectedVideo -> {
                             logD("选择视频: ${state.thumbnailImages}")
-                            addItems(state.thumbnailImages)
+                            logD("选择视频: ${state.thumbnailImages}")
+                            addItems(state.videoUriStrings, state.thumbnailImages)
+                            binding.btnSelectVideo2.visibility = View.GONE
                         }
                     }
                 }
@@ -128,6 +111,9 @@ class JoinActivity : AppCompatActivity() {
         binding.btnSelectVideo.setOnClickListener {
             SAFUtil.selectVideoMultiple(this)
         }
+        binding.btnSelectVideo2.setOnClickListener {
+            SAFUtil.selectVideoMultiple(this)
+        }
         binding.btnJoin.setOnClickListener {
             viewModel.joinVideo()
         }
@@ -139,6 +125,19 @@ class JoinActivity : AppCompatActivity() {
             if (requestCode == SAFUtil.VIDEO_MULTIPLE_PICKER_REQUEST_CODE) {
                 viewModel.setupVideoUriStrings(resultData?.clipData)
             }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.tvInfo.visibility = View.VISIBLE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.VISIBLE
+        } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.tvInfo.visibility = View.GONE
+            binding.spaceTop.visibility = View.GONE
+            binding.spaceBottom.visibility = View.GONE
         }
     }
 }

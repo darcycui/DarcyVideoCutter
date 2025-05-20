@@ -8,5 +8,5 @@ sealed class VideoJoinState {
     object Loading : VideoJoinState()
     data class Success(val outputUri: Uri) : VideoJoinState()
     data class Error(val error: String) : VideoJoinState()
-    data class SelectedVideo(val thumbnailImages: List<String>) : VideoJoinState()
+    data class SelectedVideo(val videoUriStrings: List<String>, val thumbnailImages: List<String>) : VideoJoinState()
 }

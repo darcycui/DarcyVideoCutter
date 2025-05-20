@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.net.toUri
+import com.darcy.videocutter.R
 import com.darcy.videocutter.databinding.FragmentViewPagerItemBinding
 
 private const val ARG_TITLE = "title"
@@ -44,7 +45,7 @@ class VideoThumbnailFragment : Fragment() {
     }
 
     private fun initView() {
-        binding.tvTitle.text = title
+        binding.tvTitle.text = context?.getString(R.string.file_path, title) ?: title
         binding.videoImage.setImageURI(uriStr?.toUri())
     }
 

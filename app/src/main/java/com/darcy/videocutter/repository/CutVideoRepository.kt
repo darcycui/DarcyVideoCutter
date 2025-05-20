@@ -1,12 +1,14 @@
 package com.darcy.videocutter.repository
 
 import android.content.Context
+import android.os.Environment
 import androidx.core.net.toUri
 import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_saf_select.utils.UriConvertUtil
 import com.darcy.lib_saf_select.utils.UriUtil
 import com.darcy.videocutter.app.App
 import com.darcy.videocutter.interface_dapters.ICutVideoRepository
+import com.darcy.videocutter.utils.TimeUtil
 import com.darcy.videocutter.utils.VideoCutter
 import java.io.File
 
@@ -52,8 +54,18 @@ class CutVideoRepository(private val context: Context = App.getInstance()) : ICu
             return null
         }
 
-        val cutFileName = "${fileName}_cut.mp4"
-        val tempCutFile = File(context.getExternalFilesDir("output_tmp"), cutFileName)
-        return VideoCutter.cutVideo(originalFile, tempCutFile.absolutePath, startMs, endMs)
+//        val cutFileName = "${fileName}_cut.mp4"
+//        val tempCutFile = File(context.getExternalFilesDir("output_tmp"), cutFileName)
+        val moviesDir = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_MOVIES
+        )
+        val cutFolder =  File(moviesDir, "cut_videos")
+        if (cutFolder.exists().not()) {
+            cutFolder.mkdirs()
+        }
+        val filePrefix = "cut_video_"
+        val fileExt = ".mp4"
+        var dest = File(cutFolder, "${filePrefix}${TimeUtil.getCurrentTimeShort()}$fileExt")
+        return VideoCutter.cutVideo(originalFile, dest.absolutePath, startMs, endMs)
     }
 }

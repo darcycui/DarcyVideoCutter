@@ -3,4 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="purple">#FF7E57C2</color>
+    <color name="color_00cdcd">#00CDCD</color>
+    <color name="color_1c86ee">#1C86EE</color>
+    <color name="gray">#fef7ff</color>
+
+    <color name="transparent">#00000000</color>
 </resources>

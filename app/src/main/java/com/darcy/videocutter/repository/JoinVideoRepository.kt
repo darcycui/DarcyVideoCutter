@@ -10,7 +10,6 @@ import com.darcy.videocutter.utils.TimeUtil
 import com.darcy.videocutter.utils.VideoJoiner
 import java.io.File
 
-
 class JoinVideoRepository(private val context: Context = App.getInstance()) : IJoinVideoRepository {
     override suspend fun joinVideo(inputUriStrings: List<String>): String? {
         val videos = mutableListOf<String>()
@@ -24,9 +23,13 @@ class JoinVideoRepository(private val context: Context = App.getInstance()) : IJ
         val moviesDir = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_MOVIES
         )
+        val joinFolder = File(moviesDir, "merged_videos")
+        if (joinFolder.exists().not()) {
+            joinFolder.mkdirs()
+        }
         val filePrefix = "merged_video_"
         val fileExt = ".mp4"
-        var dest = File(moviesDir, "${filePrefix}${TimeUtil.getCurrentTime()}$fileExt")
+        var dest = File(joinFolder, "${filePrefix}${TimeUtil.getCurrentTimeShort()}$fileExt")
         val outputPath = dest.absolutePath
 
         return VideoJoiner.mergeVideosLossless(

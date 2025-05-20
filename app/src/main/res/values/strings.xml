@@ -1,10 +1,15 @@
 <resources>
     <string name="app_name">DarcyVideoCutter</string>
     <string name="start_00_00_00">标记开始时间\n %s </string>
+    <string name="start_00_00_00_empty">标记开始时间</string>
     <string name="end_00_00_00">标记结束时间\n %s </string>
+    <string name="end_00_00_00_empty">标记结束时间</string>
     <string name="cut_period"> %s </string>
+    <string name="cut_period_empty">  </string>
     <string name="cut_period_default"> 00:00:00 </string>
-    <string name="file_path">文件: %1$s</string>
+    <string name="file_path">原文件: %1$s</string>
+    <string name="file_path_cut">切割后文件: %1$s</string>
+    <string name="file_path_joined">拼接后文件: %1$s</string>
     <!-- 权限相关 -->
     <string name="title_media_permission">视频访问权限说明</string>
     <string name="rationale_media_permission">需要访问视频文件权限来剪辑您选择的媒体内容，该权限仅用于视频处理功能</string>
@@ -21,5 +26,10 @@
     <string name="btn_app_settings">去设置</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="cut_video">切割视频</string>
+    <string name="join_video">拼接视频</string>
+    <string name="output_folder">输出目录</string>
+    <string name="cut_cut">切割</string>
+    <string name="select_video">选取视频</string>
 
 </resources>

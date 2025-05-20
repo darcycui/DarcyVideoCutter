@@ -7,108 +7,28 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <Space
-        android:id="@+id/spaceBottom"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <TextView
-        android:id="@+id/tvInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/spaceBottom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnSelectOutputFolder"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="输出目录"
-        android:textSize="11sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnCut"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnCut"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="切割"
-        app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
-        app:layout_constraintHorizontal_weight="1.8"
-        app:layout_constraintStart_toEndOf="@+id/btnSelectOutputFolder"
-        app:layout_constraintTop_toTopOf="@+id/btnSelectOutputFolder" />
-
-    <Button
-        android:id="@+id/btnSelectVideo"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="选取视频"
-        android:textSize="11sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/btnCut"
-        app:layout_constraintTop_toTopOf="@+id/btnSelectOutputFolder" />
-
-    <Button
-        android:id="@+id/btnMarkStartTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start_00_00_00"
-        app:layout_constraintBottom_toTopOf="@+id/btnSelectOutputFolder"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/tvCutPeriod"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:text="@string/cut_period"
-        app:layout_constraintBottom_toBottomOf="@id/btnMarkStartTime"
-        app:layout_constraintEnd_toStartOf="@id/btnMarkEndTime"
-        app:layout_constraintStart_toEndOf="@id/btnMarkStartTime"
-        app:layout_constraintTop_toTopOf="@id/btnMarkStartTime" />
-
-    <Button
-        android:id="@+id/btnMarkEndTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/end_00_00_00"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
-
-    <Space
-        android:id="@+id/spaceTop"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime"
-        app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
-
-
-    <com.darcy.lib_media3_player.view.DarcyPlayerView
-        android:id="@+id/videoPlayerView"
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/btnCutPage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/spaceTop"
-        app:layout_constraintTop_toTopOf="parent"
-        app:resize_mode="fit"
-        app:show_timeout="5000"
-        app:use_controller="true" />
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:background="@color/cardview_shadow_start_color"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:gravity="center"
+        android:text="@string/cut_video"
+        android:textSize="18sp"
+        android:background="@color/color_00cdcd"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/btnJoinPage"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/btnJoinPage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        android:text="@string/join_video"
+        android:textSize="18sp"
+        android:background="@color/color_1c86ee"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnCutPage" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

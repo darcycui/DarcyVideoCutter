@@ -1,28 +1,26 @@
 package com.darcy.videocutter.viewmodel
 
 import android.content.ClipData
-import android.content.Context
-import android.graphics.Bitmap
-import android.media.MediaMetadataRetriever
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
-import com.darcy.lib_saf_select.utils.UriUtil
-import com.darcy.videocutter.app.App
+import com.darcy.lib_log_toast.exts.logI
 import com.darcy.videocutter.repository.FileRepository
 import com.darcy.videocutter.repository.JoinVideoRepository
-import com.darcy.videocutter.repository.SPRepository
-import com.darcy.videocutter.usecase.GetSAFTreeUseCase
+import com.darcy.videocutter.repository.VideoThumbnailRepository
+import com.darcy.videocutter.usecase.DeleteVideoThumbnailFolderUseCase
+import com.darcy.videocutter.usecase.GenerateVideoThumbnailUseCase
+import com.darcy.videocutter.usecase.JoinVideoUseCase
+import com.darcy.videocutter.usecase.SaveVideoThumbnailUseCase
+import com.darcy.videocutter.viewmodel.state.VideoCutState
 import com.darcy.videocutter.viewmodel.state.VideoJoinState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * 视频拼接
@@ -41,13 +39,22 @@ class JoinViewModel : ViewModel() {
     }
     private val ioScope: CoroutineScope = CoroutineScope(Dispatchers.IO + exceptionHandler)
 
-
-    private val getSAFTreeUseCase: GetSAFTreeUseCase by lazy {
-        GetSAFTreeUseCase(SPRepository())
+    private val generateVideoThumbnailUseCase: GenerateVideoThumbnailUseCase by lazy {
+        GenerateVideoThumbnailUseCase(VideoThumbnailRepository(bitmapSizes))
+    }
+    private val saveVideoThumbnailUseCase: SaveVideoThumbnailUseCase by lazy {
+        SaveVideoThumbnailUseCase(VideoThumbnailRepository(bitmapSizes))
+    }
+    private val joinVideoUseCase: JoinVideoUseCase by lazy {
+        JoinVideoUseCase(JoinVideoRepository())
+    }
+    private val deleteThumbnailFolderCase: DeleteVideoThumbnailFolderUseCase by lazy {
+        DeleteVideoThumbnailFolderUseCase(FileRepository())
     }
 
     private val inputVideoUriStrings: MutableList<String> = mutableListOf()
     private val thumbnailImages: MutableList<String> = mutableListOf()
+    private val bitmapSizes: MutableList<Pair<Int, Int>> = mutableListOf()
     private var outputPath: String? = null
     private var publicOutUri: Uri? = null
 
@@ -66,108 +73,84 @@ class JoinViewModel : ViewModel() {
             }
             inputVideoUriStrings.clear()
             thumbnailImages.clear()
+            bitmapSizes.clear()
             for (i in 0 until clipData.itemCount) {
-                inputVideoUriStrings.add(clipData.getItemAt(i).uri.toString())
-                saveVideoThumbnail(clipData.getItemAt(i).uri)?.also {
+                val uriStr = clipData.getItemAt(i).uri.toString()
+                inputVideoUriStrings.add(uriStr)
+
+                // 生成并保存缩略图
+                saveVideoThumbnailUseCase.invoke(
+                    uriStr, generateVideoThumbnailUseCase.invoke(uriStr)
+                )?.also {
                     thumbnailImages.add(it.absolutePath)
                 }
             }
             thumbnailImages.forEachIndexed { index, uri ->
                 logD("选择文件$index UriStr-->${uri}")
             }
-            _uiState.emit(VideoJoinState.SelectedVideo(thumbnailImages))
+            _uiState.emit(VideoJoinState.SelectedVideo(inputVideoUriStrings, thumbnailImages))
         }
     }
 
     /**
-     * 保存缩略图
+     * 拼接视频
      */
-    suspend fun saveVideoThumbnail(videoUri: Uri): File? =
-        withContext(Dispatchers.IO) {
-            val context = App.getInstance()
-            // 1. 获取视频缩略图
-            val bitmap = getVideoThumbnailByRetriever(context, videoUri) ?: return@withContext null
-
-            // 2. 创建目标目录
-            val storageDir = File(context.getExternalFilesDir(null), "video_thumbnail").apply {
-                if (!exists()) mkdirs() // 确保目录存在
-            }
-
-            // 3. 生成唯一文件名（示例：使用 URI 哈希 + 时间戳）
-            val fileName = "thumb_${UriUtil.getFileNameFromUri(context, videoUri)}_${videoUri.hashCode()}.jpg"
-            val thumbnailFile = File(storageDir, fileName)
-            if (thumbnailFile.exists()) {
-                return@withContext thumbnailFile
-            }
-            // 4. 保存到文件
-            return@withContext try {
-                thumbnailFile.apply {
-                    FileOutputStream(this).use { fos ->
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos) // JPEG 质量 85%
-                        fos.flush()
-                    }
-                    logE("保存缩略图成功: $absolutePath")
-                }
-            } catch (e: Exception) {
-                logE("保存缩略图失败 $e")
-                null
-            }
-        }
-
-    /**
-     * 生成缩略图
-     */
-    private suspend fun getVideoThumbnailByRetriever(
-        context: Context,
-        uri: Uri
-    ): Bitmap? = withContext(Dispatchers.IO) {
-        var retriever: MediaMetadataRetriever? = null
-        try {
-            retriever = MediaMetadataRetriever().apply {
-                context.contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
-                    setDataSource(pfd.fileDescriptor)
-                }
-            }
-            retriever.getFrameAtTime(
-                1000 * 1000,
-                MediaMetadataRetriever.OPTION_CLOSEST_SYNC
-            ) // 第一秒的帧
-        } catch (e: Exception) {
-            logE("生成缩略图失败 $e")
-            null
-        } finally {
-            retriever?.release()
-        }
-    }
-
     fun joinVideo() {
         ioScope.launch {
+            if (inputVideoUriStrings.isEmpty() || thumbnailImages.isEmpty() || bitmapSizes.isEmpty()) {
+                logE("拼接视频失败: inputVideoUriStrings or thumbnailImages or bitmapSizes is empty.")
+                _uiState.emit(VideoJoinState.Error("拼接视频失败: 参数为空."))
+            }
+            if (inputVideoUriStrings.size == 1) {
+                logE("拼接视频失败: inputVideoUriStrings.size <= 1.")
+                _uiState.emit(VideoJoinState.Error("1个视频无需拼接"))
+                return@launch
+            }
+            // 判断 bitmapSizes list中元素的宽高是否一致
+            if (bitmapSizes.isNotEmpty()) {
+                val firstSize = bitmapSizes[0]
+                for (i in 1 until bitmapSizes.size) {
+                    if (firstSize.first != bitmapSizes[i].first || firstSize.second != bitmapSizes[i].second) {
+                        logE("拼接视频失败: bitmapSizes 不一致.")
+                        _uiState.emit(VideoJoinState.Error("拼接视频失败: 视频尺寸不一致."))
+                        return@launch
+                    }
+                }
+            }
             logD("开始拼接视频")
             _uiState.emit(VideoJoinState.Loading)
-            JoinVideoRepository().joinVideo(inputVideoUriStrings).let { it ->
-                if (it.isNullOrEmpty()) {
+            joinVideoUseCase.invoke(inputVideoUriStrings).let { it ->
+                if (it.isEmpty()) {
                     logE("拼接视频失败: outputPath is null.")
                     _uiState.emit(VideoJoinState.Error("拼接视频失败"))
                     return@launch
                 }
                 outputPath = it
+                _uiState.emit(VideoJoinState.Success(it.toUri()))
                 logD("拼接视频成功: $it")
-            }
-            FileRepository().copyToPublicOutput(outputPath, getSAFTreeUseCase.invoke()).let {
-                if (it == null || it.path.isNullOrEmpty()) {
-                    logE("复制到out失败: publicOutUri is null.")
-                    _uiState.emit(VideoJoinState.Error("复制到out失败"))
-                    return@launch
-                }
-                publicOutUri = it
-            }
-            publicOutUri?.let {
-                _uiState.emit(VideoJoinState.Success(it))
-            } ?: run {
-                logE("onError: 输出到公共目录失败 publicOutUri is null")
-                _uiState.emit(VideoJoinState.Error("输出到公共目录失败"))
             }
         }
     }
+
+    fun clearAppCacheFile() {
+        ioScope.launch {
+            try {
+                // 清除input cache
+                deleteThumbnailFolderCase.invoke().also {
+                    if (!it) {
+                        logE("清除缩略图文件夹-->失败: 删除文件夹失败")
+                        _uiState.emit(VideoJoinState.Error("清除缩略图文件夹失败:删除文件夹失败"))
+                        return@launch
+                    }
+                    logI("清除缩略图文件夹-->成功")
+                }
+            } catch (e: Exception) {
+                logE("清除缩略图文件夹 output_tmp-->失败: $e")
+                _uiState.emit(VideoJoinState.Error("清除缩略图文件夹 output_tmp失败:异常"))
+                return@launch
+            }
+        }
+    }
+
 
 }

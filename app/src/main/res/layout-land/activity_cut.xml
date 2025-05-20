@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".CutActivity">
 
     <Space
         android:id="@+id/spaceBottom"
@@ -60,7 +60,7 @@
         android:id="@+id/btnMarkStartTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/start_00_00_00"
+        android:text="@string/start_00_00_00_empty"
         app:layout_constraintBottom_toTopOf="@+id/btnSelectOutputFolder"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -69,7 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="1"
-        android:text="@string/cut_period"
+        android:text="@string/cut_period_empty"
         app:layout_constraintBottom_toBottomOf="@id/btnMarkStartTime"
         app:layout_constraintEnd_toStartOf="@id/btnMarkEndTime"
         app:layout_constraintStart_toEndOf="@id/btnMarkStartTime"
@@ -79,7 +79,7 @@
         android:id="@+id/btnMarkEndTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/end_00_00_00"
+        android:text="@string/end_00_00_00_empty"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
 
@@ -102,6 +102,18 @@
         app:resize_mode="fit"
         app:show_timeout="5000"
         app:use_controller="true" />
+
+    <Button
+        android:id="@+id/btnSelectVideo2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选取视频"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/videoPlayerView"
+        app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"/>
+
 
     <ProgressBar
         android:id="@+id/progressBar"

@@ -5,13 +5,13 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".JoinActivity">
+    tools:context=".CutActivity">
 
     <Space
         android:id="@+id/spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/tvInfo"
@@ -27,18 +27,19 @@
         android:id="@+id/btnSelectOutputFolder"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="输出目录"
+        android:text="@string/output_folder"
         android:textSize="11sp"
         app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnJoin"
+        app:layout_constraintEnd_toStartOf="@+id/btnCut"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnJoin"
+        android:id="@+id/btnCut"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="拼接"
+        android:text="@string/cut_cut"
+        android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
         app:layout_constraintHorizontal_weight="1.8"
         app:layout_constraintStart_toEndOf="@+id/btnSelectOutputFolder"
@@ -48,36 +49,70 @@
         android:id="@+id/btnSelectVideo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="选取视频"
+        android:text="@string/select_video"
         android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/btnJoin"
+        app:layout_constraintStart_toEndOf="@+id/btnCut"
         app:layout_constraintTop_toTopOf="@+id/btnSelectOutputFolder" />
+
+    <Button
+        android:id="@+id/btnMarkStartTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:text="@string/start_00_00_00_empty"
+        app:layout_constraintBottom_toTopOf="@+id/btnSelectOutputFolder"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCutPeriod"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:text="@string/cut_period_empty"
+        app:layout_constraintBottom_toBottomOf="@id/btnMarkStartTime"
+        app:layout_constraintEnd_toStartOf="@id/btnMarkEndTime"
+        app:layout_constraintStart_toEndOf="@id/btnMarkStartTime"
+        app:layout_constraintTop_toTopOf="@id/btnMarkStartTime" />
+
+    <Button
+        android:id="@+id/btnMarkEndTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/end_00_00_00_empty"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
 
     <Space
         android:id="@+id/spaceTop"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnJoin" />
+        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime"
+        app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewpager2"
+
+    <com.darcy.lib_media3_player.view.DarcyPlayerView
+        android:id="@+id/videoPlayerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/spaceTop"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:resize_mode="fit"
+        app:show_timeout="5000"
+        app:use_controller="true" />
 
     <Button
         android:id="@+id/btnSelectVideo2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="选取视频"
+        android:text="@string/select_video"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/viewpager2"
-        app:layout_constraintBottom_toBottomOf="@id/viewpager2"/>
+        app:layout_constraintTop_toTopOf="@+id/videoPlayerView"
+        app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"/>
 
 
     <ProgressBar
@@ -90,6 +125,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

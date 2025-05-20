@@ -1,6 +1,7 @@
 package com.darcy.videocutter.viewmodel
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
@@ -97,8 +98,8 @@ class CutViewModel : ViewModel() {
             // 复制到私有目录
 //            copyToInputTempUseCase.invoke(inputUri.toString()).also {
 //                if (it.isEmpty()) {
-//                    logE("onError: 复制到input_tmp失败")
-//                    _uiState.emit(VideoCutState.Error("复制到input_tmp失败"))
+//                    logE("onError: 复制到输入缓存文件夹失败")
+//                    _uiState.emit(VideoCutState.Error("复制到输入缓存文件夹失败"))
 //                    return@launch
 //                }
 //                tempCacheFilePath = it
@@ -107,44 +108,45 @@ class CutViewModel : ViewModel() {
             // 无损切割
             cutVideoUseCase.invoke(inputUri.toString(), startTime, endTime).also {
                 if (it.isEmpty()) {
-                    logE("onError: 切割失败")
+                    logE("切割失败")
                     _uiState.emit(VideoCutState.Error("切割失败"))
                     return@launch
                 }
                 tempCutFilePath = it
+                _uiState.emit(VideoCutState.Success(it.toUri()))
             }
 
             //复制到输出目录
-            copyToPublicOutUseCase.invoke(tempCutFilePath, getSAFTreeUseCase.invoke()).also {
-                if (it == null) {
-                    logE("onError: 复制到out失败")
-                    _uiState.emit(VideoCutState.Error("复制到out失败"))
-                    return@launch
-                }
-                publicOutUri = it
-            }
+//            copyToPublicOutUseCase.invoke(tempCutFilePath, getSAFTreeUseCase.invoke()).also {
+//                if (it == null) {
+//                    logE("切割失败: 复制到out失败")
+//                    _uiState.emit(VideoCutState.Error("切割失败: 复制到out失败"))
+//                    return@launch
+//                }
+//                publicOutUri = it
+//            }
 
             // 删除临时文件
 //            deleteFileUseCase.invoke(tempCacheFilePath).also {
 //                if (!it) {
-//                    logE("onError: 删除input_tmp文件失败")
-//                    _uiState.emit(VideoCutState.Error("删除input_tmp文件失败"))
+//                    logE("删除失败: 删除输入缓存文件夹文件失败")
+//                    _uiState.emit(VideoCutState.Error("删除输入缓存文件夹文件失败"))
 //                    return@launch
 //                }
 //            }
-            deleteFileUseCase.invoke(tempCutFilePath).also {
-                if (!it) {
-                    logE("onError: 删除output_tmp文件失败")
-                    _uiState.emit(VideoCutState.Error("删除output_tmp文件失败"))
-                    return@launch
-                }
-            }
-            publicOutUri?.let {
-                _uiState.emit(VideoCutState.Success(it))
-            } ?: run {
-                logE("onError: 输出到公共目录失败 publicOutUri is null")
-                _uiState.emit(VideoCutState.Error("输出到公共目录失败"))
-            }
+//            deleteFileUseCase.invoke(tempCutFilePath).also {
+//                if (!it) {
+//                    logE("删除失败: 删除输出缓存文件夹文件失败")
+//                    _uiState.emit(VideoCutState.Error("删除输出缓存文件夹文件失败"))
+//                    return@launch
+//                }
+//            }
+//            publicOutUri?.let {
+//                _uiState.emit(VideoCutState.Success(it))
+//            } ?: run {
+//                logE("复制失败: 输出到公共目录失败 publicOutUri is null")
+//                _uiState.emit(VideoCutState.Error("输出到公共目录失败"))
+//            }
         }
     }
 
@@ -154,23 +156,23 @@ class CutViewModel : ViewModel() {
                 // 清除input cache
                 deleteInputCacheFolderCase.invoke().also {
                     if (!it) {
-                        logE("清除input_tmp-->失败: 删除文件夹失败")
-                        _uiState.emit(VideoCutState.Error("清除input_tmp失败:删除文件夹失败"))
+                        logE("清除输入缓存文件夹-->失败: 删除文件夹失败")
+                        _uiState.emit(VideoCutState.Error("清除输入缓存文件夹失败:删除文件夹失败"))
                         return@launch
                     }
-                    logI("清除input_tmp-->成功")
+                    logI("清除输入缓存文件夹-->成功")
                 }
                 deleteOutputCacheFolderCase.invoke().also {
                     if (!it) {
-                        logD("清除output_tmp-->失败:删除文件夹失败")
-                        _uiState.emit(VideoCutState.Error("清除output_tmp失败:删除文件夹失败"))
+                        logD("清除输出缓存文件夹-->失败:删除文件夹失败")
+                        _uiState.emit(VideoCutState.Error("清除失败:删除文件夹失败"))
                         return@launch
                     }
-                    logI("清除output_tmp-->成功")
+                    logI("清除输出缓存文件夹-->成功")
                 }
             } catch (e: Exception) {
-                logE("清除input_tmp output_tmp-->失败: $e")
-                _uiState.emit(VideoCutState.Error("清除input_tmp output_tmp失败:异常"))
+                logE("清除输入缓存文件夹 输出缓存文件夹-->失败: $e")
+                _uiState.emit(VideoCutState.Error("清除输入缓存文件夹 输出缓存文件夹失败:异常"))
                 return@launch
             }
         }
@@ -207,7 +209,7 @@ class CutViewModel : ViewModel() {
                 return@launch
             }
             val periodText = TimeUtil.millisecondsToTime(endTime - startTime)
-            logI("时长: $periodText")
+            logI("切割视频时长: $periodText")
             _uiState.emit(VideoCutState.Period(periodText))
         }
     }

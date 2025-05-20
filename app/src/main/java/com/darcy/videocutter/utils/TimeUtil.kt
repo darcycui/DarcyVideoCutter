@@ -21,11 +21,20 @@ object TimeUtil {
             TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
         )
     }
+
     /**
      * 获取当前时间 yyyy-MM-dd-HH:mm:ss
      */
-    fun getCurrentTime(): String {
+    fun getCurrentTimeLong(): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
+        return LocalDateTime.now().format(formatter)
+    }
+
+    /**
+     * 获取当前时间 yy-MMdd-HH:mm
+     */
+    fun getCurrentTimeShort(): String {
+        val formatter = DateTimeFormatter.ofPattern("yy-MMdd-HH-mm")
         return LocalDateTime.now().format(formatter)
     }
 

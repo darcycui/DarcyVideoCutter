@@ -3,7 +3,7 @@ package com.darcy.videocutter.usecase
 import com.darcy.videocutter.interface_dapters.ICutVideoRepository
 
 /**
- * 复制uri文件到私有目录
+ * 切割视频
  */
 class CutVideoUseCase(
     private val cutVideoRepository: ICutVideoRepository
