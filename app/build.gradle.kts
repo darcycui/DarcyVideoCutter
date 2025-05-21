@@ -1,5 +1,9 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import java.io.FileInputStream
 import java.io.InputStreamReader
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.Properties
 
 plugins {
@@ -15,8 +19,8 @@ android {
         applicationId = "com.darcy.videocutter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.0.2"
+        versionCode = 3
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -61,6 +65,39 @@ android {
             )
             signingConfig = signingConfigs.getByName("releaseSign")
         }
+    }
+    applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .matching { it.name.contains("release") }
+            .configureEach {
+                // 任务1: 修改APK名称
+                val formatter = SimpleDateFormat("yyyyMMdd-HH-mm-ss")
+                val buildTime = formatter.format(Date())
+                val newOutputFileName = "DarcyVideoCutter_V${variant.versionName}_${buildTime}.apk"
+                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = newOutputFileName
+
+                // 任务2: 复制APK到根目录release文件夹
+                val copyTask = tasks.register("copy${variant.name}Apk", Copy::class) {
+                    from(outputFile)
+                    into(File(project.rootDir, "release"))
+                    // 添加依赖确保文件存在
+                    dependsOn(variant.assembleProvider)
+                }
+
+                // 挂接到构建流程
+                // 正确挂接任务（使用 finalizedBy）
+                val variantNameUppercased = variant.name.replaceFirstChar {
+                    if (it.isLowerCase()) {
+                        it.uppercase(Locale.getDefault())
+                    } else {
+                        it.toString()
+                    }
+                }
+                tasks.named("assemble$variantNameUppercased").configure {
+                    finalizedBy(copyTask)
+                }
+            }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
