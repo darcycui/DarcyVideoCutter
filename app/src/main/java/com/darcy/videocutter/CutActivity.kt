@@ -69,7 +69,8 @@ class CutActivity : AppCompatActivity() {
                         is VideoCutState.Success -> {
                             binding.progressBar.visibility = View.GONE
                             logI("切割成功:${state.outputUri}")
-                            binding.tvInfo.text = getString(R.string.file_path_cut, state.outputUri.path)
+                            binding.tvInfo.text =
+                                getString(R.string.file_path_cut, state.outputUri.path)
                             toasts("切割成功")
                         }
 
@@ -84,26 +85,18 @@ class CutActivity : AppCompatActivity() {
                             binding.tvInfo.text = getString(R.string.file_path, state.videoUri.path)
                             binding.videoPlayerView.setMediaUri(state.videoUri)
                             binding.videoPlayerView.start()
-                            resetUI()
+                            resetTimeUI()
                         }
 
                         is VideoCutState.MarkStartTime -> {
                             binding.videoPlayerView.pause()
-                            binding.btnMarkStartTime.text =
-                                getString(
-                                    R.string.start_00_00_00,
-                                    TimeUtil.millisecondsToTime(state.time)
-                                )
+                            setStartTime(state.time)
                             setPeriodTextInfo()
                         }
 
                         is VideoCutState.MarkEndTime -> {
                             binding.videoPlayerView.pause()
-                            binding.btnMarkEndTime.text =
-                                getString(
-                                    R.string.end_00_00_00,
-                                    TimeUtil.millisecondsToTime(state.time)
-                                )
+                            setEndTime(state.time)
                             setPeriodTextInfo()
                         }
 
@@ -113,6 +106,19 @@ class CutActivity : AppCompatActivity() {
                                 binding.tvCutPeriod.text = getString(R.string.cut_period_default)
                             } else {
                                 binding.tvCutPeriod.text = getString(R.string.cut_period, text)
+                            }
+                        }
+
+                        is VideoCutState.DynamicUI -> {
+                            if (state.startTime < 0) {
+                                resetStartTimeUI()
+                            } else {
+                                setStartTime(state.startTime)
+                            }
+                            if (state.endTime < 0) {
+                                resetEndTimeUI()
+                            } else {
+                                setEndTime(state.endTime)
                             }
                         }
                     }
@@ -147,7 +153,7 @@ class CutActivity : AppCompatActivity() {
 
     private fun proceedAfterPermissionGranted() {
         // 原视频选择逻辑
-        viewModel.clearAppCacheFile()
+//        viewModel.clearAppCacheFile()
         SAFUtil.selectVideo(this)
     }
 
@@ -179,8 +185,26 @@ class CutActivity : AppCompatActivity() {
         viewModel.setupPeriod()
     }
 
-    private fun resetUI() {
+    private fun resetTimeUI() {
+        resetStartTimeUI()
+        resetEndTimeUI()
+    }
+
+    private fun setStartTime(time: Long) {
+        binding.btnMarkStartTime.text =
+            getString(R.string.start_00_00_00, TimeUtil.millisecondsToTime(time))
+    }
+
+    private fun setEndTime(time: Long) {
+        binding.btnMarkEndTime.text =
+            getString(R.string.end_00_00_00, TimeUtil.millisecondsToTime(time))
+    }
+
+    private fun resetStartTimeUI() {
         binding.btnMarkStartTime.text = getString(R.string.start_00_00_00_empty)
+    }
+
+    private fun resetEndTimeUI() {
         binding.btnMarkEndTime.text = getString(R.string.end_00_00_00_empty)
     }
 
@@ -220,9 +244,6 @@ class CutActivity : AppCompatActivity() {
     }
 
     private fun setDynamicUI() {
-        val startTimeText = binding.btnMarkStartTime.text.toString().trim().substringAfterLast(" ")
-        binding.btnMarkStartTime.text = getString(R.string.start_00_00_00, "$startTimeText ")
-        val endTimeText = binding.btnMarkEndTime.text.toString().trim().substringAfterLast(" ")
-        binding.btnMarkEndTime.text = getString(R.string.end_00_00_00, "$endTimeText ")
+        viewModel.setupDynamicUI()
     }
 }

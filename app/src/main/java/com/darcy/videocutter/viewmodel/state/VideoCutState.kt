@@ -12,4 +12,5 @@ sealed class VideoCutState {
     data class MarkStartTime(val time: Long) : VideoCutState()
     data class MarkEndTime(val time: Long) : VideoCutState()
     data class Period(val text: String) : VideoCutState()
+    data class DynamicUI(val startTime: Long, val endTime: Long) : VideoCutState()
 }

@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context=".CutActivity">
 
     <Space
@@ -100,8 +101,14 @@
         app:layout_constraintBottom_toTopOf="@+id/spaceTop"
         app:layout_constraintTop_toTopOf="parent"
         app:resize_mode="fit"
-        app:show_timeout="5000"
-        app:use_controller="true" />
+        app:show_timeout="1000"
+        app:use_controller="true"
+        app:auto_show="false"
+        app:play_icon="@drawable/play_100"
+        app:pause_icon="@drawable/pause_100"
+        app:rewind_icon="@drawable/rewind_100"
+        app:fastforward_icon="@drawable/fast_forward_100"
+        app:controller_layout_id="@layout/player_view_layout"/>
 
     <Button
         android:id="@+id/btnSelectVideo2"

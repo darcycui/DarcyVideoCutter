@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+<!--    <drawable name="exo_styled_controls_play" tools:ignore="PrivateResource">@drawable/play_100</drawable>-->
+<!--    <drawable name="exo_styled_controls_pause" tools:ignore="PrivateResource">@drawable/pause_100</drawable>-->
+<!--    <drawable name="exo_styled_controls_rewind"  tools:ignore="PrivateResource">@drawable/rewind_100</drawable>-->
+<!--    <drawable name="exo_styled_controls_fastforward"  tools:ignore="PrivateResource">@drawable/fast_forward_100</drawable>-->
+</resources>

@@ -213,4 +213,11 @@ class CutViewModel : ViewModel() {
             _uiState.emit(VideoCutState.Period(periodText))
         }
     }
+
+    fun setupDynamicUI() {
+        ioScope.launch {
+            _uiState.emit(VideoCutState.DynamicUI(startTime,  endTime))
+            logI("当前startTime: $startTime, 当前endTime: $endTime")
+        }
+    }
 }

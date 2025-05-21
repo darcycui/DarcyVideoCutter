@@ -5,7 +5,9 @@
     <color name="purple">#FF7E57C2</color>
     <color name="color_00cdcd">#00CDCD</color>
     <color name="color_1c86ee">#1C86EE</color>
-    <color name="gray">#fef7ff</color>
+    <color name="gray">#808080</color>
 
     <color name="transparent">#00000000</color>
+    <color name="gray_dark">#88808080</color>
+    <color name="gray_light">#22808080</color>
 </resources>

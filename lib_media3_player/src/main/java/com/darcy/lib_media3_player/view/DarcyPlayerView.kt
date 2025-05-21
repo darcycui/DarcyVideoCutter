@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.AttributeSet
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 
 class DarcyPlayerView(
@@ -18,10 +19,20 @@ class DarcyPlayerView(
     private val player: ExoPlayer by lazy {
         ExoPlayer.Builder(this.context).build()
     }
+    // 添加控制器引用
+    private val controllerView by lazy {
+        findViewById<PlayerControlView>(androidx.media3.ui.R.id.exo_controller)
+    }
     private var hasPaused = false
 
     init {
         this.setPlayer(player)
+        // 获取默认的 PlayerControlView 并设置间隔
+        controllerView?.apply {
+
+//            setForwardIncrementMs(10_000) // 10秒快进
+//            setRewindIncrementMs(5_000)       // 5秒快退
+        }
     }
 
     override fun setMediaUri(uri: Uri) {

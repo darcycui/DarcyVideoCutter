@@ -46,6 +46,6 @@ dependencies {
     implementation(project(":lib_log_toast"))
     // 添加exoplayer依赖
     api(libs.androidx.media3.exoplayer)
-    api(libs.androidx.media3.exoplayer.dash)
+//    api(libs.androidx.media3.exoplayer.dash) // 流媒体解码
     api(libs.androidx.media3.ui)
 }
