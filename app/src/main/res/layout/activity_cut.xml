@@ -108,7 +108,7 @@
         app:pause_icon="@drawable/pause_100"
         app:rewind_icon="@drawable/rewind_100"
         app:fastforward_icon="@drawable/fast_forward_100"
-        app:controller_layout_id="@layout/player_view_layout"/>
+        app:controller_layout_id="@layout/player_control_view_layout"/>
 
     <Button
         android:id="@+id/btnSelectVideo2"

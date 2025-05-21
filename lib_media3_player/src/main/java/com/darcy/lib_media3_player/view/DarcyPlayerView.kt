@@ -29,9 +29,6 @@ class DarcyPlayerView(
         this.setPlayer(player)
         // 获取默认的 PlayerControlView 并设置间隔
         controllerView?.apply {
-
-//            setForwardIncrementMs(10_000) // 10秒快进
-//            setRewindIncrementMs(5_000)       // 5秒快退
         }
     }
 
