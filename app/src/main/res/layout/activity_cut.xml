@@ -12,7 +12,7 @@
         android:id="@+id/spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
         android:id="@+id/tvInfo"
@@ -98,17 +98,18 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/black"
+        app:auto_show="true"
+        app:controller_layout_id="@layout/player_control_view_layout"
+        app:fastforward_icon="@drawable/fast_forward_100"
         app:layout_constraintBottom_toTopOf="@+id/spaceTop"
         app:layout_constraintTop_toTopOf="parent"
-        app:resize_mode="fit"
-        app:show_timeout="1000"
-        app:use_controller="true"
-        app:auto_show="false"
-        app:play_icon="@drawable/play_100"
         app:pause_icon="@drawable/pause_100"
+        app:play_icon="@drawable/play_100"
+        app:resize_mode="fit"
         app:rewind_icon="@drawable/rewind_100"
-        app:fastforward_icon="@drawable/fast_forward_100"
-        app:controller_layout_id="@layout/player_control_view_layout"/>
+        app:show_timeout="1000"
+        app:time_bar_min_update_interval="100"
+        app:use_controller="true" />
 
     <Button
         android:id="@+id/btnSelectVideo2"
@@ -116,10 +117,10 @@
         android:layout_height="wrap_content"
         android:text="@string/select_video"
         android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/videoPlayerView"
-        app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"/>
+        app:layout_constraintTop_toTopOf="@+id/videoPlayerView" />
 
 
     <ProgressBar

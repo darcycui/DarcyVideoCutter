@@ -3,11 +3,19 @@ package com.darcy.lib_media3_player.view
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
+import android.view.GestureDetector
+import android.view.MotionEvent
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
+import com.darcy.lib_log_toast.exts.logD
+import com.darcy.lib_log_toast.exts.logV
+import com.darcy.lib_media3_player.view.listener.VideoGestureListener
 
+@UnstableApi
 class DarcyPlayerView(
     context: Context,
     attrs: AttributeSet?,
@@ -16,20 +24,35 @@ class DarcyPlayerView(
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
+    // 播放控制器
     private val player: ExoPlayer by lazy {
-        ExoPlayer.Builder(this.context).build()
+        ExoPlayer.Builder(this.context)
+            .setSeekForwardIncrementMs(30_000L)
+            .setSeekBackIncrementMs(10_000L)
+            .build()
     }
-    // 添加控制器引用
-    private val controllerView by lazy {
-        findViewById<PlayerControlView>(androidx.media3.ui.R.id.exo_controller)
-    }
+
     private var hasPaused = false
+
+    // 手势检测
+    val gestureListener = VideoGestureListener(player, this)
+    val gestureDetector = GestureDetector(context, gestureListener)
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        gestureDetector.onTouchEvent(event)
+        if (event.action == MotionEvent.ACTION_UP) {
+            if (gestureListener.getScrolledDistance() > 0) {
+                logV("调整进度")
+                gestureListener.applyProgressAdjustment()
+            } else {
+                logD("不调整进度")
+            }
+        }
+        return true
+    }
 
     init {
         this.setPlayer(player)
-        // 获取默认的 PlayerControlView 并设置间隔
-        controllerView?.apply {
-        }
     }
 
     override fun setMediaUri(uri: Uri) {
