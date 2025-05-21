@@ -4,8 +4,6 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.media3.common.Player
 import androidx.media3.ui.PlayerView
-import com.darcy.lib_log_toast.exts.logD
-import com.darcy.lib_log_toast.exts.logI
 import kotlin.math.absoluteValue
 
 class VideoGestureListener(
@@ -23,7 +21,7 @@ class VideoGestureListener(
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        logD("onSingleTapUp--> isScrolling=$isScrolling")
+        // logD("onSingleTapUp--> isScrolling=$isScrolling")
         if (isScrolling) {
             applyProgressAdjustment()
             isScrolling = false
@@ -66,7 +64,7 @@ class VideoGestureListener(
     ): Boolean {
         isScrolling = true
         accumulatedDeltaX -= distanceX // 累积滑动量（distanceX为旧坐标-新坐标）
-        logI("onScroll--> isScrolling=true accumulatedDeltaX=$accumulatedDeltaX")
+        // logI("onScroll--> isScrolling=true accumulatedDeltaX=$accumulatedDeltaX")
         return true
     }
 

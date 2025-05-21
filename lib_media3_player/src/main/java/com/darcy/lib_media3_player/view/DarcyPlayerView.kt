@@ -42,10 +42,10 @@ class DarcyPlayerView(
         gestureDetector.onTouchEvent(event)
         if (event.action == MotionEvent.ACTION_UP) {
             if (gestureListener.getScrolledDistance() > 0) {
-                logV("调整进度")
+                // logV("调整进度")
                 gestureListener.applyProgressAdjustment()
             } else {
-                logD("不调整进度")
+                // logD("不调整进度")
             }
         }
         return true
