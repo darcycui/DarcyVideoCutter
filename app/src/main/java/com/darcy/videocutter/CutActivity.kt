@@ -1,9 +1,12 @@
 package com.darcy.videocutter
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.view.Surface
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -30,6 +33,7 @@ class CutActivity : AppCompatActivity() {
         ActivityCutBinding.inflate(layoutInflater)
     }
     private val viewModel: CutViewModel by viewModels<CutViewModel>()
+    private var isClockScreenOrientation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -127,12 +131,15 @@ class CutActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("SourceLockedOrientationActivity")
     private fun initView() {
+        setupScreenOrientationLock()
         binding.tvInfo.setOnClickListener {
             startActivity(Intent(this, JoinActivity::class.java))
         }
-        binding.btnSelectOutputFolder.setOnClickListener {
-            SAFUtil.requestPersistentDirAccess(this)
+        binding.btnClockScreenOrientation.setOnClickListener {
+            isClockScreenOrientation = !isClockScreenOrientation
+            setupScreenOrientationLock()
         }
         binding.btnSelectVideo.setOnClickListener {
             proceedAfterPermissionGranted()
@@ -148,6 +155,35 @@ class CutActivity : AppCompatActivity() {
         }
         binding.btnCut.setOnClickListener {
             viewModel.cutVideo()
+        }
+    }
+
+    private fun setupScreenOrientationLock() {
+        if (isClockScreenOrientation) {
+            binding.btnClockScreenOrientation.text = getString(R.string.lock_screen_orientation)
+
+            // 获取当前屏幕方向
+            when (resources.configuration.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> {
+                    windowManager.defaultDisplay.rotation.also {
+                        logD("当前屏幕方向:$it")
+                        when (it) {
+                            Surface.ROTATION_90 ->
+                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+
+                            Surface.ROTATION_270 ->
+                                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                        }
+                    }
+                }
+
+                Configuration.ORIENTATION_PORTRAIT -> {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                }
+            }
+        } else {
+            binding.btnClockScreenOrientation.text = getString(R.string.unlock_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
         }
     }
 

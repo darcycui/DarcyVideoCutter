@@ -25,10 +25,10 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnSelectOutputFolder"
+        android:id="@+id/btnClockScreenOrientation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="输出目录"
+        android:text="@string/lock_screen_orientation"
         android:textSize="11sp"
         app:layout_constraintBottom_toTopOf="@+id/tvInfo"
         app:layout_constraintEnd_toStartOf="@+id/btnCut"
@@ -39,29 +39,30 @@
         android:id="@+id/btnCut"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="切割"
+        android:text="@string/cut_cut"
+        android:textSize="18sp"
         app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
         app:layout_constraintHorizontal_weight="1.8"
-        app:layout_constraintStart_toEndOf="@+id/btnSelectOutputFolder"
-        app:layout_constraintTop_toTopOf="@+id/btnSelectOutputFolder" />
+        app:layout_constraintStart_toEndOf="@+id/btnClockScreenOrientation"
+        app:layout_constraintTop_toTopOf="@+id/btnClockScreenOrientation" />
 
     <Button
         android:id="@+id/btnSelectVideo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="选取视频"
+        android:text="@string/select_video"
         android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintStart_toEndOf="@+id/btnCut"
-        app:layout_constraintTop_toTopOf="@+id/btnSelectOutputFolder" />
+        app:layout_constraintTop_toTopOf="@+id/btnClockScreenOrientation" />
 
     <Button
         android:id="@+id/btnMarkStartTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/start_00_00_00_empty"
-        app:layout_constraintBottom_toTopOf="@+id/btnSelectOutputFolder"
+        app:layout_constraintBottom_toTopOf="@+id/btnClockScreenOrientation"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -107,7 +108,7 @@
         android:id="@+id/btnSelectVideo2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="选取视频"
+        android:text="@string/select_video"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

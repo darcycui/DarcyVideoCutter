@@ -1,5 +1,6 @@
 package com.darcy.lib_media3_player.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.AttributeSet
@@ -15,7 +16,8 @@ import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logV
 import com.darcy.lib_media3_player.view.listener.VideoGestureListener
 
-@UnstableApi
+//@UnstableApi
+@SuppressLint("UnsafeOptInUsageError")
 class DarcyPlayerView(
     context: Context,
     attrs: AttributeSet?,
