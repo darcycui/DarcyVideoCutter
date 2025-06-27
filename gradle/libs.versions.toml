@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.0"
+agp = "8.10.1"
 kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -12,6 +12,8 @@ activity = "1.10.1"
 constraintlayout = "2.2.1"
 media3Exoplayer = "1.6.1"
 mobileFfmpegFull = "4.4.LTS"
+mockk = "1.13.5"
+viewbindingBase = "2.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,6 +29,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 mobile-ffmpeg-full = { module = "com.arthenica:mobile-ffmpeg-full", version.ref = "mobileFfmpegFull" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+dylancaicoding-viewbinding-base = { module = "com.github.DylanCaiCoding.ViewBindingKTX:viewbinding-base", version.ref = "viewbindingBase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

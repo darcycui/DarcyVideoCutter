@@ -1,4 +1,6 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.gradle.kotlin.dsl.implementation
+import org.gradle.kotlin.dsl.testImplementation
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.text.SimpleDateFormat
@@ -19,8 +21,8 @@ android {
         applicationId = "com.darcy.videocutter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.0.4"
+        versionCode = 5
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -50,13 +52,17 @@ android {
 
     buildTypes {
         debug {
-            isDebuggable = true
-            isMinifyEnabled = false
-            isShrinkResources = false
+//            isMinifyEnabled = false
+//            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("debugSign")
         }
         release {
-            isMinifyEnabled = true
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -137,6 +143,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    // mockk 单元测试 mock框架
+    testImplementation (libs.mockk)
 
     // viewModel 拓展方法
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -146,4 +154,6 @@ dependencies {
     implementation(project(":lib_media3_player"))
 
     implementation(libs.mobile.ffmpeg.full)
+    // viewbinding封装
+    implementation (libs.dylancaicoding.viewbinding.base)
 }

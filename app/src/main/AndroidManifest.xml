@@ -31,11 +31,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".JoinActivity"
+            android:name=".ui.JoinActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:exported="false" />
         <activity
-            android:name=".CutActivity"
+            android:name=".ui.CutActivity"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:exported="false">
 

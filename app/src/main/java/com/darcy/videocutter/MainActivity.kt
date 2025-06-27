@@ -10,12 +10,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.videocutter.databinding.ActivityMainBinding
 import com.darcy.videocutter.dialog.PermissionDialog
 import com.darcy.videocutter.settings.SettingsUtil
+import com.darcy.videocutter.ui.CutActivity
+import com.darcy.videocutter.ui.JoinActivity
 
 class MainActivity : AppCompatActivity() {
     private val mediaPermissionLauncher = registerForActivityResult(

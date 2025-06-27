@@ -1,4 +1,4 @@
-package com.darcy.videocutter
+package com.darcy.videocutter.ui
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -18,17 +17,19 @@ import com.darcy.lib_log_toast.exts.logI
 import com.darcy.lib_log_toast.exts.logV
 import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.lib_saf_select.utils.SAFUtil
+import com.darcy.videocutter.R
 import com.darcy.videocutter.adapter.ViewPager2Adapter
 import com.darcy.videocutter.databinding.ActivityJoinBinding
 import com.darcy.videocutter.fragment.VideoThumbnailFragment
+import com.darcy.videocutter.ui.base.BaseBindingActivity
 import com.darcy.videocutter.viewmodel.JoinViewModel
 import com.darcy.videocutter.viewmodel.state.VideoJoinState
 import kotlinx.coroutines.launch
 
-class JoinActivity : AppCompatActivity() {
-    private val binding: ActivityJoinBinding by lazy {
-        ActivityJoinBinding.inflate(layoutInflater)
-    }
+class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
+//    private val binding: ActivityJoinBinding by lazy {
+//        ActivityJoinBinding.inflate(layoutInflater)
+//    }
     private val viewModel: JoinViewModel by viewModels()
     private val fragments: MutableList<Fragment> = mutableListOf()
     private val viewpager2Adapter: ViewPager2Adapter by lazy {
@@ -90,7 +91,8 @@ class JoinActivity : AppCompatActivity() {
                             logI("拼接成功: ${state.outputUri}")
                             toasts("拼接成功：${state.outputUri}")
                             binding.progressBar.visibility = View.GONE
-                            binding.tvInfo.text = getString(R.string.file_path_joined, state.outputUri.path)
+                            binding.tvInfo.text =
+                                getString(R.string.file_path_joined, state.outputUri.path)
                         }
 
                         is VideoJoinState.SelectedVideo -> {
