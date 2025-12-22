@@ -1,6 +1,8 @@
 package com.darcy.videocutter
 
 import android.Manifest
+import android.R.attr.data
+import android.app.ComponentCaller
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -11,6 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.darcy.lib_log_toast.exts.toasts
+import com.darcy.lib_saf_select.folder_data.DialogHelper
+import com.darcy.lib_saf_select.folder_data.RequestCode
+import com.darcy.lib_saf_select.utils.SAFUtil
+import com.darcy.lib_saf_select.utils.SPKey
+import com.darcy.lib_saf_select.utils.SPUtil
 import com.darcy.videocutter.databinding.ActivityMainBinding
 import com.darcy.videocutter.dialog.PermissionDialog
 import com.darcy.videocutter.settings.SettingsUtil
@@ -62,6 +69,20 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this@MainActivity, JoinActivity::class.java))
             }
         }
+
+        binding.btnFolderTreePermission.setOnClickListener {
+            val dataPathAll = "/storage/emulated/0/Android/data"
+            val dataPathOne = "/storage/emulated/0/Android/data/com.xunlei.downloadprovider"
+            val obbPath = "/storage/emulated/0/Android/obb"
+            SPUtil.setUseNewDocument(this, true)
+            DialogHelper.showRequestUriPermissionDialog(this, dataPathAll)
+//            SPUtil.setUseNewDocument(this, false)
+//            DialogHelper.showRequestUriPermissionDialog(this, dataPathOne)
+        }
+
+        binding.btnFolderTree.setOnClickListener {
+            SAFUtil.requestPersistentDirAccess(this)
+        }
     }
 
     // 在 MainActivity 内添加以下方法
@@ -99,5 +120,29 @@ class MainActivity : AppCompatActivity() {
 
     private fun proceedAfterPermissionGranted() {
         // do something
+    }
+
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        resultData: Intent?,
+        caller: ComponentCaller
+    ) {
+        super.onActivityResult(requestCode, resultCode, resultData, caller)
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RequestCode.DOCUMENT) {
+                resultData?.data?.let { uri ->
+                    // 持久化权限 (关键)
+                    contentResolver.takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    )
+                    // 保存 URI 到 SharedPreferences
+                    SPUtil.saveUri(this, SPKey.KEY_ANDROID_DATA_URI, uri)
+                }
+            }
+        } else {
+            toasts("Activity result not OK")
+        }
     }
 }

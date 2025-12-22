@@ -33,7 +33,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
 //        ActivityCutBinding.inflate(layoutInflater)
 //    }
     private val viewModel: CutViewModel by viewModels<CutViewModel>()
-    private var isClockScreenOrientation = false
+    private var isLockScreenOrientation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,8 +137,8 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         binding.tvInfo.setOnClickListener {
             startActivity(Intent(this, JoinActivity::class.java))
         }
-        binding.btnClockScreenOrientation.setOnClickListener {
-            isClockScreenOrientation = !isClockScreenOrientation
+        binding.btnLockScreenOrientation.setOnClickListener {
+            isLockScreenOrientation = !isLockScreenOrientation
             setupScreenOrientationLock()
         }
         binding.btnSelectVideo.setOnClickListener {
@@ -159,14 +159,15 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
     }
 
     private fun setupScreenOrientationLock() {
-        if (isClockScreenOrientation) {
-            binding.btnClockScreenOrientation.text = getString(R.string.lock_screen_orientation)
-            // 设置为传感器方向
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
-        } else {
-            binding.btnClockScreenOrientation.text = getString(R.string.unlock_screen_orientation)
+        if (isLockScreenOrientation) {
+            // 不旋转
+            binding.btnLockScreenOrientation.text = getString(R.string.lock_screen_orientation)
 //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        } else {
+            // 设置为传感器方向
+            binding.btnLockScreenOrientation.text = getString(R.string.unlock_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
         }
     }
 

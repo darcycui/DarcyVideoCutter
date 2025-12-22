@@ -44,6 +44,42 @@ object UriUtil {
             "unknown_file."
         }
     }
+    /**
+     * 获取文件大小
+     */
+    fun getFileSizeFromUri(context: Context, uri: Uri): String {
+        val projection = arrayOf(android.provider.OpenableColumns.SIZE)
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val sizeIndex = cursor.getColumnIndexOrThrow(android.provider.OpenableColumns.SIZE)
+                return formatFileSize(cursor.getLong(sizeIndex))
+            }
+        }
+        return "未知大小"
+    }
+
+    /**
+     * 格式化文件大小
+     */
+    private fun formatFileSize(size: Long): String {
+        return when {
+            size >= 1024 * 1024 * 1024 -> {
+                "%.2f GB".format(size / (1024.0 * 1024.0 * 1024.0))
+            }
+
+            size >= 1024 * 1024 -> {
+                "%.2f MB".format(size / (1024.0 * 1024.0))
+            }
+
+            size >= 1024 -> {
+                "%.2f KB".format(size / 1024.0)
+            }
+
+            else -> {
+                "$size B"
+            }
+        }
+    }
 
     suspend fun copyFileToAppDir(
         context: Context,

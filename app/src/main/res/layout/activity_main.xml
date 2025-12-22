@@ -11,11 +11,11 @@
         android:id="@+id/btnCutPage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/color_00cdcd"
         android:gravity="center"
         android:text="@string/cut_video"
-        android:textSize="18sp"
-        android:background="@color/color_00cdcd"
         android:textColor="@color/black"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/btnJoinPage"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,12 +23,39 @@
         android:id="@+id/btnJoinPage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:gravity="center"
-        android:textColor="@color/black"
-        android:text="@string/join_video"
-        android:textSize="18sp"
         android:background="@color/color_1c86ee"
+        android:gravity="center"
+        android:text="@string/join_video"
+        android:textColor="@color/black"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnCutPage" />
+
+
+    <Button
+        android:id="@+id/btnFolderTreePermission"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/output_folder_permission"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnFolderTree"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/btnFolderTree"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/output_folder"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintStart_toEndOf="@+id/btnFolderTreePermission"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

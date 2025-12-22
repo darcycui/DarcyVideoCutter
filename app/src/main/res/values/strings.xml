@@ -28,6 +28,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="cut_video">切割视频</string>
     <string name="join_video">拼接视频</string>
+    <string name="output_folder_permission">Android/data授权</string>
     <string name="output_folder">输出目录</string>
     <string name="cut_cut">切割</string>
     <string name="select_video">选取视频</string>
