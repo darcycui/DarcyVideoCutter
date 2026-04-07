@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_log_toast.exts.logI
+import com.darcy.lib_log_toast.exts.logW
 import com.darcy.lib_log_toast.exts.toasts
 import com.darcy.lib_saf_select.utils.SAFUtil
 import com.darcy.videocutter.R
@@ -33,10 +34,10 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
 //        ActivityCutBinding.inflate(layoutInflater)
 //    }
     private val viewModel: CutViewModel by viewModels<CutViewModel>()
-    private var isLockScreenOrientation = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        logD("onCreate 调用")
         enableEdgeToEdge()
         setContentView(binding.root)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -50,8 +51,8 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             window.statusBarColor = resources.getColor(R.color.black, null) // 状态栏背景色
             insets
         }
-        initView()
         initFlowCollect()
+        initView()
     }
 
     private fun initFlowCollect() {
@@ -124,6 +125,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
                             } else {
                                 setEndTime(state.endTime)
                             }
+                            setupScreenOrientationLock(state.isLandScreen)
                         }
                     }
                 }
@@ -133,13 +135,13 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
 
     @SuppressLint("SourceLockedOrientationActivity")
     private fun initView() {
-        setupScreenOrientationLock()
+        logD("initView 调用")
+        setupScreenOrientationLock(viewModel.getIsLandScreen())
         binding.tvInfo.setOnClickListener {
             startActivity(Intent(this, JoinActivity::class.java))
         }
         binding.btnLockScreenOrientation.setOnClickListener {
-            isLockScreenOrientation = !isLockScreenOrientation
-            setupScreenOrientationLock()
+            viewModel.setupIsLandScreen(!viewModel.getIsLandScreen())
         }
         binding.btnSelectVideo.setOnClickListener {
             proceedAfterPermissionGranted()
@@ -158,18 +160,20 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         }
     }
 
-    private fun setupScreenOrientationLock() {
-        if (isLockScreenOrientation) {
-            // 不旋转
-            binding.btnLockScreenOrientation.text = getString(R.string.lock_screen_orientation)
-//            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+    private fun setupScreenOrientationLock(landScreen: Boolean) {
+        if (landScreen) {
+            // 横屏
+            logD("设置横屏")
+            binding.btnLockScreenOrientation.text = getString(R.string.land_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         } else {
-            // 设置为传感器方向
-            binding.btnLockScreenOrientation.text = getString(R.string.unlock_screen_orientation)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR)
+            // 竖屏
+            logI("设置竖屏")
+            binding.btnLockScreenOrientation.text = getString(R.string.portrait_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
         }
     }
+
 
     private fun proceedAfterPermissionGranted() {
         // 原视频选择逻辑
@@ -250,6 +254,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        logW("onConfigurationChanged: 新配置-->${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             setDynamicUI()
             binding.tvInfo.visibility = View.VISIBLE

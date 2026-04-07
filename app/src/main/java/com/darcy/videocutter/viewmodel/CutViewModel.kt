@@ -64,6 +64,7 @@ class CutViewModel : ViewModel() {
     private var inputUri: Uri? = null
     private var startTime = -1L
     private var endTime = -1L
+    private var isLandScreen = false
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         logE("$TAG error: $throwable")
@@ -202,6 +203,13 @@ class CutViewModel : ViewModel() {
         }
     }
 
+    fun setupIsLandScreen(landScreen: Boolean) {
+        ioScope.launch {
+            isLandScreen = landScreen
+            _uiState.emit(VideoCutState.DynamicUI(startTime, endTime, isLandScreen))
+        }
+    }
+
     fun setupPeriod() {
         ioScope.launch {
             if (startTime < 0 || endTime < 0 || startTime >= endTime) {
@@ -216,8 +224,12 @@ class CutViewModel : ViewModel() {
 
     fun setupDynamicUI() {
         ioScope.launch {
-            _uiState.emit(VideoCutState.DynamicUI(startTime,  endTime))
+            _uiState.emit(VideoCutState.DynamicUI(startTime, endTime, isLandScreen))
             logI("当前startTime: $startTime, 当前endTime: $endTime")
         }
+    }
+
+    fun getIsLandScreen(): Boolean {
+        return isLandScreen
     }
 }

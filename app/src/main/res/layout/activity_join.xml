@@ -27,7 +27,7 @@
         android:id="@+id/btn_lock_screen_orientation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/lock_screen_orientation"
+        android:text="@string/land_screen_orientation"
         android:textSize="11sp"
         app:layout_constraintBottom_toTopOf="@+id/tvInfo"
         app:layout_constraintEnd_toStartOf="@+id/btnJoin"
