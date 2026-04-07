@@ -64,7 +64,7 @@ class CutViewModel : ViewModel() {
     private var inputUri: Uri? = null
     private var startTime = -1L
     private var endTime = -1L
-    private var isLandScreen = false
+    private var isLandScreen = true
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         logE("$TAG error: $throwable")
