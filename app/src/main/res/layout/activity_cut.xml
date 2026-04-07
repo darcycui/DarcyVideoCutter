@@ -23,15 +23,15 @@
         android:id="@+id/spaceBottom"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <TextView
         android:id="@+id/tvInfo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:visibility="gone"
+        android:text="video info"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/spaceBottom"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -43,21 +43,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/start_00_00_00_empty"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnLockScreenOrientation"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <Button
-        android:id="@+id/btnLockScreenOrientation"
-        style="@style/CustomButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/land_screen_orientation"
-        android:textSize="11sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/tvInfo"
         app:layout_constraintEnd_toStartOf="@+id/btnCut"
-        app:layout_constraintStart_toEndOf="@+id/btnMarkStartTime"/>
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnCut"
@@ -66,20 +56,9 @@
         android:layout_height="wrap_content"
         android:text="@string/cut_cut"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
-        app:layout_constraintStart_toEndOf="@+id/btnLockScreenOrientation"
-        app:layout_constraintTop_toTopOf="@+id/btnLockScreenOrientation" />
-
-    <Button
-        android:id="@+id/btnSelectVideo"
-        style="@style/CustomButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/select_video"
-        android:textSize="11sp"
+        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
         app:layout_constraintEnd_toStartOf="@+id/btnMarkEndTime"
-        app:layout_constraintStart_toEndOf="@+id/btnCut"
-        app:layout_constraintTop_toTopOf="@+id/btnLockScreenOrientation" />
+        app:layout_constraintStart_toEndOf="@+id/btnMarkStartTime" />
 
 
     <Button
@@ -88,33 +67,63 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/end_00_00_00_empty"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSelectVideo"
+        app:layout_constraintStart_toEndOf="@+id/btnCut"
         app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
+
+    <Space
+        android:id="@+id/spaceTop"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime" />
+
 
     <TextView
         android:id="@+id/tvCutPeriod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxLines="1"
-        tools:text="05:00"
         android:text="@string/cut_period_empty"
+        android:textColor="@color/white"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="05:00" />
 
-    <Space
-        android:id="@+id/spaceTop"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime"
-        app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
+    <Button
+        android:id="@+id/btnLockScreenOrientation"
+        style="@style/CustomButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/land_screen_orientation"
+        android:textSize="11sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <Button
+        android:id="@+id/btnSelectVideo"
+        style="@style/CustomButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:text="@string/select_video"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnSelectVideo2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingStart="100dp"
+        android:paddingEnd="100dp"
         android:text="@string/select_video"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@+id/videoPlayerView"

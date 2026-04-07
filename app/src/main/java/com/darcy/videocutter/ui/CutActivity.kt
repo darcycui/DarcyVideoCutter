@@ -30,7 +30,7 @@ import com.darcy.videocutter.viewmodel.state.VideoCutState
 import kotlinx.coroutines.launch
 
 class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
-//    private val binding: ActivityCutBinding by lazy {
+    //    private val binding: ActivityCutBinding by lazy {
 //        ActivityCutBinding.inflate(layoutInflater)
 //    }
     private val viewModel: CutViewModel by viewModels<CutViewModel>()
@@ -49,6 +49,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             val controller = WindowCompat.getInsetsController(window, v)
             controller.isAppearanceLightStatusBars = false // 关闭浅色模式，字体变白
             window.statusBarColor = resources.getColor(R.color.black, null) // 状态栏背景色
+            window.navigationBarColor = resources.getColor(R.color.black, null) // 导航栏背景色
             insets
         }
         initFlowCollect()
