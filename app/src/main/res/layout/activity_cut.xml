@@ -13,10 +13,17 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/black"
+        app:auto_show="true"
+        app:controller_layout_id="@layout/player_control_view_layout"
+        app:fastforward_icon="@drawable/fast_forward_100"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:pause_icon="@drawable/pause_100"
+        app:play_icon="@drawable/play_100"
         app:resize_mode="fit"
-        app:show_timeout="5000"
+        app:rewind_icon="@drawable/rewind_100"
+        app:show_timeout="1000"
+        app:time_bar_min_update_interval="100"
         app:use_controller="true" />
 
     <Space
@@ -40,58 +47,76 @@
     <Button
         android:id="@+id/btnMarkStartTime"
         style="@style/CustomButtonStyle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:text="@string/start_00_00_00_empty"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnCut"
-        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintBottom_toTopOf="@+id/spaceTop"
         app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnCut"
-        style="@style/CustomButtonStyle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/cut_cut"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnMarkEndTime"
-        app:layout_constraintStart_toEndOf="@+id/btnMarkStartTime" />
 
 
     <Button
         android:id="@+id/btnMarkEndTime"
         style="@style/CustomButtonStyle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:text="@string/end_00_00_00_empty"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnCut"
         app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
 
     <Space
         android:id="@+id/spaceTop"
         android:layout_width="match_parent"
-        android:layout_height="20dp"
+        android:layout_height="100dp"
         android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime" />
+        app:layout_constraintBottom_toTopOf="@+id/tvInfo" />
 
 
     <TextView
         android:id="@+id/tvCutPeriod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:maxLines="1"
         android:text="@string/cut_period_empty"
         android:textColor="@color/white"
-        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="05:00" />
+
+
+    <Button
+        android:id="@+id/btnCut"
+        style="@style/CustomButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:text="@string/cut_cut"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvCutPeriod"
+        app:layout_constraintEnd_toStartOf="@+id/tvCutPeriod"
+        app:layout_constraintStart_toEndOf="@+id/btnLockScreenOrientation"
+        app:layout_constraintTop_toTopOf="@+id/tvCutPeriod" />
+
+
+    <Button
+        android:id="@+id/btnCut2"
+        style="@style/CustomButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:text="@string/cut_cut"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvCutPeriod"
+        app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
+        app:layout_constraintStart_toEndOf="@+id/tvCutPeriod"
+        app:layout_constraintTop_toTopOf="@+id/tvCutPeriod" />
 
     <Button
         android:id="@+id/btnLockScreenOrientation"

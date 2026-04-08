@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     tools:context=".ui.JoinActivity">
 
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpager2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Space
         android:id="@+id/spaceBottom"
         android:layout_width="match_parent"
@@ -24,37 +32,42 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btn_lock_screen_orientation"
+        android:id="@+id/btnLandScreen"
+        style="@style/CustomButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
         android:text="@string/land_screen_orientation"
         android:textSize="11sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvInfo"
-        app:layout_constraintEnd_toStartOf="@+id/btnJoin"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnJoin"
+        style="@style/CustomButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/join_join"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/btnSelectVideo"
-        app:layout_constraintHorizontal_weight="1.8"
-        app:layout_constraintStart_toEndOf="@+id/btn_lock_screen_orientation"
-        app:layout_constraintTop_toTopOf="@+id/btn_lock_screen_orientation" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/btnSelectVideo"
+        style="@style/CustomButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:text="@string/select_video"
         android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_weight="1"
-        app:layout_constraintStart_toEndOf="@+id/btnJoin"
-        app:layout_constraintTop_toTopOf="@+id/btn_lock_screen_orientation" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Space
         android:id="@+id/spaceTop"
@@ -62,17 +75,12 @@
         android:layout_height="20dp"
         app:layout_constraintBottom_toTopOf="@+id/btnJoin" />
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewpager2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/spaceTop"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/btnSelectVideo2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingStart="100dp"
+        android:paddingEnd="100dp"
         android:text="@string/select_video"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="@id/viewpager2"

@@ -7,6 +7,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -61,6 +64,15 @@ class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
         setContentView(binding.root)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val controller = WindowCompat.getInsetsController(window, v)
+            controller.isAppearanceLightStatusBars = false // 关闭浅色模式，字体变白
+            window.statusBarColor = resources.getColor(R.color.black, null) // 状态栏背景色
+            window.navigationBarColor = resources.getColor(R.color.black, null) // 导航栏背景色
+            insets
         }
         initView()
         initFlowCollect()

@@ -1,5 +1,6 @@
 package com.darcy.videocutter.ui
 
+import android.R.attr.orientation
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -138,6 +139,15 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
     private fun initView() {
         logD("initView 调用")
         setupScreenOrientationLock(viewModel.getIsLandScreen())
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.tvInfo.visibility = View.VISIBLE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.VISIBLE
+        } else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.tvInfo.visibility = View.GONE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.GONE
+        }
         binding.tvInfo.setOnClickListener {
             startActivity(Intent(this, JoinActivity::class.java))
         }
@@ -159,22 +169,10 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         binding.btnCut.setOnClickListener {
             viewModel.cutVideo()
         }
-    }
-
-    private fun setupScreenOrientationLock(landScreen: Boolean) {
-        if (landScreen) {
-            // 横屏
-            logD("设置横屏")
-            binding.btnLockScreenOrientation.text = getString(R.string.land_screen_orientation)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-        } else {
-            // 竖屏
-            logI("设置竖屏")
-            binding.btnLockScreenOrientation.text = getString(R.string.portrait_screen_orientation)
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        binding.btnCut2.setOnClickListener {
+            viewModel.cutVideo()
         }
     }
-
 
     private fun proceedAfterPermissionGranted() {
         // 原视频选择逻辑
@@ -253,6 +251,20 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         super.onDestroy()
     }
 
+    private fun setupScreenOrientationLock(landScreen: Boolean) {
+        if (landScreen) {
+            // 横屏
+            logD("设置横屏")
+            binding.btnLockScreenOrientation.text = getString(R.string.land_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+        } else {
+            // 竖屏
+            logI("设置竖屏")
+            binding.btnLockScreenOrientation.text = getString(R.string.portrait_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+        }
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         logW("onConfigurationChanged: 新配置-->${newConfig.orientation}")
@@ -264,7 +276,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setDynamicUI()
             binding.tvInfo.visibility = View.GONE
-            binding.spaceTop.visibility = View.GONE
+            binding.spaceTop.visibility = View.VISIBLE
             binding.spaceBottom.visibility = View.GONE
         }
     }
