@@ -1,6 +1,7 @@
 package com.darcy.videocutter.ui
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -30,7 +31,7 @@ import com.darcy.videocutter.viewmodel.state.VideoJoinState
 import kotlinx.coroutines.launch
 
 class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
-//    private val binding: ActivityJoinBinding by lazy {
+    //    private val binding: ActivityJoinBinding by lazy {
 //        ActivityJoinBinding.inflate(layoutInflater)
 //    }
     private val viewModel: JoinViewModel by viewModels()
@@ -109,9 +110,13 @@ class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
 
                         is VideoJoinState.SelectedVideo -> {
                             logD("选择视频: ${state.thumbnailImages}")
-                            logD("选择视频: ${state.thumbnailImages}")
                             addItems(state.videoUriStrings, state.thumbnailImages)
                             binding.btnSelectVideo2.visibility = View.GONE
+                        }
+
+                        is VideoJoinState.DynamicUI -> {
+                            logD("动态UI: 横屏：${state.isLandScreen}")
+                            setupScreenOrientationLock(state.isLandScreen)
                         }
                     }
                 }
@@ -120,6 +125,16 @@ class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
     }
 
     private fun initView() {
+        setupScreenOrientationLock(viewModel.getIsLandScreen())
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.tvInfo.visibility = View.GONE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.VISIBLE
+        } else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.tvInfo.visibility = View.GONE
+            binding.spaceTop.visibility = View.VISIBLE
+            binding.spaceBottom.visibility = View.GONE
+        }
         binding.viewpager2.offscreenPageLimit = fragments.size - 1 // 缓存页数
         binding.viewpager2.adapter = viewpager2Adapter
         binding.btnSelectVideo.setOnClickListener {
@@ -127,6 +142,9 @@ class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
         }
         binding.btnSelectVideo2.setOnClickListener {
             SAFUtil.selectVideoMultiple(this)
+        }
+        binding.btnLandScreen.setOnClickListener {
+            viewModel.setupIsLandScreen(!viewModel.getIsLandScreen())
         }
         binding.btnJoin.setOnClickListener {
             viewModel.joinVideo()
@@ -139,6 +157,20 @@ class JoinActivity : BaseBindingActivity<ActivityJoinBinding>() {
             if (requestCode == SAFUtil.VIDEO_MULTIPLE_PICKER_REQUEST_CODE) {
                 viewModel.setupVideoUriStrings(resultData?.clipData)
             }
+        }
+    }
+
+    private fun setupScreenOrientationLock(landScreen: Boolean) {
+        if (landScreen) {
+            // 横屏
+            logD("设置横屏")
+            binding.btnLandScreen.text = getString(R.string.land_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+        } else {
+            // 竖屏
+            logI("设置竖屏")
+            binding.btnLandScreen.text = getString(R.string.portrait_screen_orientation)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
         }
     }
 

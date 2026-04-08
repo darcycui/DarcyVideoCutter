@@ -57,6 +57,7 @@ class JoinViewModel : ViewModel() {
     private val bitmapSizes: MutableList<Pair<Int, Int>> = mutableListOf()
     private var outputPath: String? = null
     private var publicOutUri: Uri? = null
+    private var isLandScreen = false
 
     private val _uiState: MutableSharedFlow<VideoJoinState> = MutableSharedFlow(replay = 0)
     val uiState = _uiState
@@ -152,5 +153,16 @@ class JoinViewModel : ViewModel() {
         }
     }
 
+
+    fun setupIsLandScreen(landScreen: Boolean) {
+        ioScope.launch {
+            isLandScreen = landScreen
+            _uiState.emit(VideoJoinState.DynamicUI(isLandScreen))
+        }
+    }
+
+    fun getIsLandScreen(): Boolean {
+        return isLandScreen
+    }
 
 }

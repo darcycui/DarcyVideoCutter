@@ -140,7 +140,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         logD("initView 调用")
         setupScreenOrientationLock(viewModel.getIsLandScreen())
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            binding.tvInfo.visibility = View.VISIBLE
+            binding.tvInfo.visibility = View.GONE
             binding.spaceTop.visibility = View.VISIBLE
             binding.spaceBottom.visibility = View.VISIBLE
         } else if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -148,10 +148,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             binding.spaceTop.visibility = View.VISIBLE
             binding.spaceBottom.visibility = View.GONE
         }
-        binding.tvInfo.setOnClickListener {
-            startActivity(Intent(this, JoinActivity::class.java))
-        }
-        binding.btnLockScreenOrientation.setOnClickListener {
+        binding.btnLandScreen.setOnClickListener {
             viewModel.setupIsLandScreen(!viewModel.getIsLandScreen())
         }
         binding.btnSelectVideo.setOnClickListener {
@@ -255,12 +252,12 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         if (landScreen) {
             // 横屏
             logD("设置横屏")
-            binding.btnLockScreenOrientation.text = getString(R.string.land_screen_orientation)
+            binding.btnLandScreen.text = getString(R.string.land_screen_orientation)
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         } else {
             // 竖屏
             logI("设置竖屏")
-            binding.btnLockScreenOrientation.text = getString(R.string.portrait_screen_orientation)
+            binding.btnLandScreen.text = getString(R.string.portrait_screen_orientation)
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
         }
     }
@@ -270,7 +267,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         logW("onConfigurationChanged: 新配置-->${newConfig.orientation}")
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             setDynamicUI()
-            binding.tvInfo.visibility = View.VISIBLE
+            binding.tvInfo.visibility = View.GONE
             binding.spaceTop.visibility = View.VISIBLE
             binding.spaceBottom.visibility = View.VISIBLE
         } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {

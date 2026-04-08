@@ -100,7 +100,7 @@
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="@+id/tvCutPeriod"
         app:layout_constraintEnd_toStartOf="@+id/tvCutPeriod"
-        app:layout_constraintStart_toEndOf="@+id/btnLockScreenOrientation"
+        app:layout_constraintStart_toEndOf="@+id/btnLandScreen"
         app:layout_constraintTop_toTopOf="@+id/tvCutPeriod" />
 
 
@@ -119,7 +119,7 @@
         app:layout_constraintTop_toTopOf="@+id/tvCutPeriod" />
 
     <Button
-        android:id="@+id/btnLockScreenOrientation"
+        android:id="@+id/btnLandScreen"
         style="@style/CustomButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
