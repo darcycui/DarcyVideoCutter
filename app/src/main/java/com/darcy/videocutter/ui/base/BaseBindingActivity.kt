@@ -1,5 +1,6 @@
 package com.darcy.videocutter.ui.base
 
+import android.content.Context
 import android.os.Bundle
 import androidx.annotation.Keep
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,10 @@ import com.dylanc.viewbinding.base.ActivityBindingDelegate
 //@Keep
 open class BaseBindingActivity<VB : ViewBinding>
     : AppCompatActivity(), ActivityBinding<VB> by ActivityBindingDelegate() {
+    protected val context: Context by lazy {
+        this
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentViewWithBinding()

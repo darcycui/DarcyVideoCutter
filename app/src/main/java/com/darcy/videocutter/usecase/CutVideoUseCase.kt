@@ -11,13 +11,14 @@ class CutVideoUseCase(
     // 重载operator
     suspend operator fun invoke(
         inputUriStr: String?,
+        ext: String,
         startMs: Long,
         endMs: Long
     ): String {
         return if (inputUriStr == null || startMs < 0 || endMs < 0 || startMs >= endMs) {
             ""
         } else {
-            cutVideoRepository.cutVideo(inputUriStr, startMs, endMs) ?: ""
+            cutVideoRepository.cutVideo(inputUriStr, ext, startMs, endMs) ?: ""
         }
     }
 }

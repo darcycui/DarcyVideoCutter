@@ -48,4 +48,8 @@ dependencies {
     api(libs.androidx.media3.exoplayer)
 //    api(libs.androidx.media3.exoplayer.dash) // 流媒体解码
     api(libs.androidx.media3.ui)
+//    api(libs.androidx.media3.exoplayer.decoder)
+    // FFmpeg 扩展解码器需要本地编译 https://github.com/androidx/media/tree/release/libraries/decoder_ffmpeg
+    // https://juejin.cn/post/7565815654344785929
+
 }

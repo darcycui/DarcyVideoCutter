@@ -7,12 +7,16 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import com.darcy.lib_log_toast.exts.logD
+import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_log_toast.exts.logV
 import com.darcy.lib_media3_player.view.listener.VideoGestureListener
 
@@ -28,10 +32,39 @@ class DarcyPlayerView(
 
     // 播放控制器
     private val player: ExoPlayer by lazy {
-        ExoPlayer.Builder(this.context)
+        // 创建 RenderersFactory 并设置扩展渲染器模式
+        val renderersFactory = DefaultRenderersFactory(this.context).apply {
+            // EXTENSION_RENDERER_MODE_PREFER 会优先使用 FFmpeg 等扩展解码器
+            // 如果设为 EXTENSION_RENDERER_MODE_ON，则在系统硬解不支持时 fallback 到 FFmpeg
+            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+//            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+        }
+
+        // 使用自定义 RenderersFactory 构建 ExoPlayer
+        ExoPlayer.Builder(this.context, renderersFactory)
             .setSeekForwardIncrementMs(30_000L)
             .setSeekBackIncrementMs(10_000L)
-            .build()
+            .build().apply {
+                // 4. 设置监听（1.6.1 推荐使用 addListener 而非 setListener）
+                addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        logD("播放器状态：$playbackState")
+                        if (playbackState == Player.STATE_READY) {
+                            // 准备就绪
+                        }
+                    }
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        // 处理错误
+                        logE("播放器错误：$error")
+                        if (error.errorCode == PlaybackException.ERROR_CODE_DECODING_FAILED) {
+                            logE("WMV解码失败，请确认 FFmpeg 扩展已加载")
+                        }
+                    }
+                })
+
+            }
+
     }
 
     private var hasPaused = false

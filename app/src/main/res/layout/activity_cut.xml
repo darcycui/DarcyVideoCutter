@@ -51,10 +51,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:paddingEnd="100dp"
         android:text="@string/start_00_00_00_empty"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/spaceTop"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/editStart"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="10dp"
+        android:minWidth="100dp"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btnMarkStartTime"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="aaaa"
+        tools:visibility="visible" />
 
 
     <Button
@@ -63,10 +77,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
+        android:paddingStart="100dp"
         android:text="@string/end_00_00_00_empty"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnMarkStartTime" />
+
+
+    <EditText
+        android:id="@+id/editEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginEnd="10dp"
+        android:minWidth="100dp"
+        android:textColor="@color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btnMarkEndTime"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="bbbb"
+        tools:visibility="visible" />
 
     <Space
         android:id="@+id/spaceTop"

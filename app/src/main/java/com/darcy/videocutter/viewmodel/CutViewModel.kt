@@ -18,6 +18,7 @@ import com.darcy.videocutter.usecase.DeleteOutputCacheFolderUseCase
 import com.darcy.videocutter.usecase.GetSAFTreeUseCase
 import com.darcy.videocutter.usecase.SaveSAFTreeUseCase
 import com.darcy.videocutter.utils.TimeUtil
+import com.darcy.videocutter.utils.VideoFormatUtils
 import com.darcy.videocutter.viewmodel.state.VideoCutState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -62,6 +63,7 @@ class CutViewModel : ViewModel() {
     private var tempCutFilePath = ""
     private var publicOutUri: Uri? = null
     private var inputUri: Uri? = null
+    private var ext: String = "mp4"
     private var startTime = -1L
     private var endTime = -1L
     private var isLandScreen = false
@@ -88,7 +90,7 @@ class CutViewModel : ViewModel() {
      */
     fun cutVideo() {
         ioScope.launch {
-            if (inputUri == null || startTime <= 0L || endTime <= 0L || startTime >= endTime) {
+            if (inputUri == null || startTime < 0L || endTime <= 0L || startTime >= endTime) {
                 logD("参数不合法 inputUri: $inputUri, startTime: $startTime, endTime: $endTime")
                 _uiState.emit(VideoCutState.Error("参数不合法"))
                 return@launch
@@ -107,7 +109,7 @@ class CutViewModel : ViewModel() {
 //            }
 
             // 无损切割
-            cutVideoUseCase.invoke(inputUri.toString(), startTime, endTime).also {
+            cutVideoUseCase.invoke(inputUri.toString(), ext, startTime, endTime).also {
                 if (it.isEmpty()) {
                     logE("切割失败")
                     _uiState.emit(VideoCutState.Error("切割失败"))
@@ -177,6 +179,11 @@ class CutViewModel : ViewModel() {
                 return@launch
             }
         }
+    }
+
+
+    fun setupVideoExt(ext: String) {
+        this.ext = ext
     }
 
     fun setupVideoUri(uri: Uri) {

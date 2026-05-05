@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -26,6 +27,7 @@ import com.darcy.videocutter.R
 import com.darcy.videocutter.databinding.ActivityCutBinding
 import com.darcy.videocutter.ui.base.BaseBindingActivity
 import com.darcy.videocutter.utils.TimeUtil
+import com.darcy.videocutter.utils.VideoFormatUtils
 import com.darcy.videocutter.viewmodel.CutViewModel
 import com.darcy.videocutter.viewmodel.state.VideoCutState
 import kotlinx.coroutines.launch
@@ -158,16 +160,34 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             proceedAfterPermissionGranted()
         }
         binding.btnMarkStartTime.setOnClickListener {
-            viewModel.setupStartTime(binding.videoPlayerView.getCurrentPosition())
+            val startTime = if (binding.editStart.isVisible && binding.editStart.text.isNotBlank()){
+                binding.editStart.text.trim().toString().toLongOrNull()?.times(1000) ?: 0
+            } else {
+                binding.videoPlayerView.getCurrentPosition()
+            }
+            viewModel.setupStartTime(startTime)
         }
         binding.btnMarkEndTime.setOnClickListener {
-            viewModel.setupEndTime(binding.videoPlayerView.getCurrentPosition())
+            val endTime = if (binding.editEnd.isVisible && binding.editEnd.text.isNotBlank()){
+                binding.editEnd.text.trim().toString().toLongOrNull()?.times(1000) ?: 0
+            } else {
+                binding.videoPlayerView.getCurrentPosition()
+            }
+            viewModel.setupEndTime(endTime)
         }
         binding.btnCut.setOnClickListener {
             viewModel.cutVideo()
         }
         binding.btnCut2.setOnClickListener {
             viewModel.cutVideo()
+        }
+        binding.btnMarkStartTime.setOnLongClickListener {
+            binding.editStart.visibility = View.VISIBLE
+            true
+        }
+        binding.btnMarkEndTime.setOnLongClickListener {
+            binding.editEnd.visibility = View.VISIBLE
+            true
         }
     }
 
@@ -183,6 +203,7 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             if (requestCode == SAFUtil.VIDEO_PICKER_REQUEST_CODE) {
                 resultData?.data?.let { uri ->
                     logD("选择文件Uri-->${uri.path}")
+                    viewModel.setupVideoExt(VideoFormatUtils.getVideoFormat(context, uri))
                     viewModel.setupVideoUri(uri)
                 }
             }
