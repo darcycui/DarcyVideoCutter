@@ -43,6 +43,7 @@
             android:exported="false" />
         <activity
             android:name=".ui.CutActivity"
+            android:windowSoftInputMode="adjustPan|stateHidden"
             android:configChanges="orientation|screenSize|layoutDirection"
             android:exported="false">
 

@@ -1,6 +1,5 @@
 package com.darcy.videocutter.ui
 
-import android.R.attr.orientation
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -8,6 +7,8 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.core.view.ViewCompat
@@ -17,15 +18,20 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
 import com.darcy.lib_log_toast.exts.logI
 import com.darcy.lib_log_toast.exts.logW
 import com.darcy.lib_log_toast.exts.toasts
+import com.darcy.lib_media3_player.view.listener.IPlayerListener
 import com.darcy.lib_saf_select.utils.SAFUtil
 import com.darcy.videocutter.R
 import com.darcy.videocutter.databinding.ActivityCutBinding
 import com.darcy.videocutter.ui.base.BaseBindingActivity
+import com.darcy.videocutter.utils.InputTimeFormat
+import com.darcy.videocutter.utils.KeyboardUtil
 import com.darcy.videocutter.utils.TimeUtil
 import com.darcy.videocutter.utils.VideoFormatUtils
 import com.darcy.videocutter.viewmodel.CutViewModel
@@ -98,13 +104,13 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
                         }
 
                         is VideoCutState.MarkStartTime -> {
-                            binding.videoPlayerView.pause()
+                            //binding.videoPlayerView.pause()
                             setStartTime(state.time)
                             setPeriodTextInfo()
                         }
 
                         is VideoCutState.MarkEndTime -> {
-                            binding.videoPlayerView.pause()
+                            //binding.videoPlayerView.pause()
                             setEndTime(state.time)
                             setPeriodTextInfo()
                         }
@@ -140,6 +146,41 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
     @SuppressLint("SourceLockedOrientationActivity")
     private fun initView() {
         logD("initView 调用")
+        binding.videoPlayerView.setPlayerListener(object : IPlayerListener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                when (playbackState) {
+                    Player.STATE_READY -> {
+                        logD("播放器已就绪")
+                        showInputStartAndEndTimeUI(false)
+                        clearInputStartAndEndTimeUI()
+                    } // 准备就绪
+                    Player.STATE_ENDED -> {
+                        logD("播放器已结束")
+                    }
+
+                    Player.STATE_BUFFERING -> {
+                        logD("播放器正在缓冲")
+                    }
+
+                    Player.STATE_IDLE -> {
+                        logD("播放器空闲")
+                    }
+
+                    else -> {
+                        logD("播放器未知状态")
+                    }
+                }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                // 处理错误
+                logE("播放失败：${error.errorCode} $error 请手动输入开始和结束时间")
+                toasts("播放失败，请手动输入开始和结束时间")
+                showInputStartAndEndTimeUI()
+                clearInputStartAndEndTimeUI()
+                setInputStartAndEndTimeKeyboardListener()
+            }
+        })
         setupScreenOrientationLock(viewModel.getIsLandScreen())
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.tvInfo.visibility = View.GONE
@@ -160,16 +201,19 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
             proceedAfterPermissionGranted()
         }
         binding.btnMarkStartTime.setOnClickListener {
-            val startTime = if (binding.editStart.isVisible && binding.editStart.text.isNotBlank()){
-                binding.editStart.text.trim().toString().toLongOrNull()?.times(1000) ?: 0
-            } else {
-                binding.videoPlayerView.getCurrentPosition()
-            }
+            val startTime =
+                if (binding.editStart.isVisible && binding.editStart.text.isNullOrBlank()) {
+                    InputTimeFormat.timeStringToMilliSeconds(
+                        binding.editStart.text.trim().toString()
+                    )
+                } else {
+                    binding.videoPlayerView.getCurrentPosition()
+                }
             viewModel.setupStartTime(startTime)
         }
         binding.btnMarkEndTime.setOnClickListener {
-            val endTime = if (binding.editEnd.isVisible && binding.editEnd.text.isNotBlank()){
-                binding.editEnd.text.trim().toString().toLongOrNull()?.times(1000) ?: 0
+            val endTime = if (binding.editEnd.isVisible && binding.editEnd.text.isNullOrBlank()) {
+                InputTimeFormat.timeStringToMilliSeconds(binding.editEnd.text.trim().toString())
             } else {
                 binding.videoPlayerView.getCurrentPosition()
             }
@@ -177,17 +221,71 @@ class CutActivity : BaseBindingActivity<ActivityCutBinding>() {
         }
         binding.btnCut.setOnClickListener {
             viewModel.cutVideo()
+            clearInputStartAndEndTimeUI()
         }
         binding.btnCut2.setOnClickListener {
             viewModel.cutVideo()
+            clearInputStartAndEndTimeUI()
         }
         binding.btnMarkStartTime.setOnLongClickListener {
-            binding.editStart.visibility = View.VISIBLE
+            showInputStartAndEndTimeUI()
+            clearInputStartAndEndTimeUI()
+            setInputStartAndEndTimeKeyboardListener()
             true
         }
         binding.btnMarkEndTime.setOnLongClickListener {
-            binding.editEnd.visibility = View.VISIBLE
+            showInputStartAndEndTimeUI()
+            clearInputStartAndEndTimeUI()
+            setInputStartAndEndTimeKeyboardListener()
             true
+        }
+    }
+
+
+    private fun clearInputStartAndEndTimeUI() {
+        binding.editStart.setText("")
+        binding.editEnd.setText("")
+    }
+
+
+    private fun showInputStartAndEndTimeUI(show: Boolean = true) {
+        if (show) {
+            binding.editStart.visibility = View.VISIBLE
+            binding.editEnd.visibility = View.VISIBLE
+        } else {
+            binding.editStart.visibility = View.GONE
+            binding.editEnd.visibility = View.GONE
+        }
+    }
+
+    private fun setInputStartAndEndTimeKeyboardListener() {
+        binding.editStart.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                viewModel.setupStartTime(
+                    InputTimeFormat.timeStringToMilliSeconds(
+                        binding.editStart.text.trim().toString()
+                    )
+                )
+                // 隐藏软键盘
+                KeyboardUtil.hideKeyboard(this)
+                true
+            } else {
+                false
+            }
+        }
+        binding.editEnd.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                viewModel.setupEndTime(
+                    InputTimeFormat.timeStringToMilliSeconds(
+                        binding.editEnd.text.trim().toString()
+                    )
+                )
+                // 隐藏软键盘
+                KeyboardUtil.hideKeyboard(this)
+                true
+            } else {
+                false
+            }
         }
     }
 

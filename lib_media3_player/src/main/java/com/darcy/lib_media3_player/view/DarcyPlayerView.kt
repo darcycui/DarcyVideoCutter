@@ -9,15 +9,12 @@ import android.view.MotionEvent
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.SeekParameters
-import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
 import com.darcy.lib_log_toast.exts.logD
 import com.darcy.lib_log_toast.exts.logE
-import com.darcy.lib_log_toast.exts.logV
+import com.darcy.lib_media3_player.view.listener.IPlayerListener
 import com.darcy.lib_media3_player.view.listener.VideoGestureListener
 
 //@UnstableApi
@@ -36,8 +33,8 @@ class DarcyPlayerView(
         val renderersFactory = DefaultRenderersFactory(this.context).apply {
             // EXTENSION_RENDERER_MODE_PREFER 会优先使用 FFmpeg 等扩展解码器
             // 如果设为 EXTENSION_RENDERER_MODE_ON，则在系统硬解不支持时 fallback 到 FFmpeg
-            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-//            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+//            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         }
 
         // 使用自定义 RenderersFactory 构建 ExoPlayer
@@ -49,17 +46,13 @@ class DarcyPlayerView(
                 addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         logD("播放器状态：$playbackState")
-                        if (playbackState == Player.STATE_READY) {
-                            // 准备就绪
-                        }
+                        playerListener?.onPlaybackStateChanged(playbackState)
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
                         // 处理错误
                         logE("播放器错误：$error")
-                        if (error.errorCode == PlaybackException.ERROR_CODE_DECODING_FAILED) {
-                            logE("WMV解码失败，请确认 FFmpeg 扩展已加载")
-                        }
+                        playerListener?.onPlayerError(error)
                     }
                 })
 
@@ -72,6 +65,9 @@ class DarcyPlayerView(
     // 手势检测
     val gestureListener = VideoGestureListener(player, this)
     val gestureDetector = GestureDetector(context, gestureListener)
+
+    // 播放监听
+    private var playerListener: IPlayerListener? = null
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         gestureDetector.onTouchEvent(event)
@@ -136,6 +132,10 @@ class DarcyPlayerView(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         release()
+    }
+
+    fun setPlayerListener(playerListener: IPlayerListener) {
+        this.playerListener = playerListener
     }
 
 }

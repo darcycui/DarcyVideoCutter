@@ -31,7 +31,7 @@ class VideoGestureListener(
         return true
     }
 
-    // 实际调整逻辑
+    // 手势拖动-->进度
     fun applyProgressAdjustment() {
         if (player.duration <= 0 || playerView.width == 0) return
 
@@ -44,7 +44,6 @@ class VideoGestureListener(
 
         // 确保进度在合法范围内
         player.seekTo(newPosition.coerceIn(0, duration))
-        player.seekTo(newPosition)
     }
 
     override fun onDoubleTap(e: MotionEvent): Boolean {
