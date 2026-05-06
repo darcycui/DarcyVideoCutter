@@ -32,6 +32,10 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    // lint 配置 run `gradlew updateLintBaseline`
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {

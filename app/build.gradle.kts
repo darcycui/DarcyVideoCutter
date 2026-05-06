@@ -21,13 +21,17 @@ android {
         applicationId = "com.darcy.videocutter"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.0.8"
+        versionCode = 9
+        versionName = "1.0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
             abiFilters.addAll(listOf("arm64-v8a"))
+        }
+        // lint 配置 run `gradlew updateLintBaseline`
+        lint {
+            baseline = file("lint-baseline.xml")
         }
     }
 
