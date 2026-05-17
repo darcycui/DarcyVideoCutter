@@ -65,7 +65,7 @@ class CutVideoRepository(private val context: Context = App.getInstance()) : ICu
         if (cutFolder.exists().not()) {
             cutFolder.mkdirs()
         }
-        val filePrefix = "cut_video_"
+        val filePrefix = fileName
         val fileExt = ".$ext"
         val dest = File(cutFolder, "${filePrefix}${TimeUtil.getCurrentTimeShort()}$fileExt")
         return VideoCutter.cutVideo(originalFile, dest.absolutePath, startMs, endMs)
