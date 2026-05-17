@@ -34,7 +34,7 @@ class DarcyPlayerView(
             // EXTENSION_RENDERER_MODE_PREFER 会优先使用 FFmpeg 等扩展解码器
             // 如果设为 EXTENSION_RENDERER_MODE_ON，则在系统硬解不支持时 fallback 到 FFmpeg
 //            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+//            setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
         }
 
         // 使用自定义 RenderersFactory 构建 ExoPlayer

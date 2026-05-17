@@ -10,7 +10,7 @@ class VideoGestureListener(
     private val player: Player,
     private val playerView: PlayerView
 ) : GestureDetector.SimpleOnGestureListener() {
-    private var sensitivity = 10.0f    // 灵敏度系数（越大调整越慢）
+    private var sensitivity = 7.0f    // 灵敏度系数（越大调整越慢）
     private var isScrolling = false
     private var accumulatedDeltaX = 0f
 
